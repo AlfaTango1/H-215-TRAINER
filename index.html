@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AS 532 AL Trainer</title>
+
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1c2420;--mut:#66726b;--line:#dfe3dc;--ok:#2f9e44;--okbg:#e3f5e7;--bad:#d9352b;--badbg:#fde7e5;--acc:#2563eb;--gold:#d99a00}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#12171a;--card:#1b2227;--ink:#e8edea;--mut:#92a09a;--line:#2b353b;--ok:#4cc16a;--okbg:#17321f;--bad:#f0645a;--badbg:#3a1b19;--acc:#6b9bff;--gold:#f0b429}}
+:root[data-theme=dark]{--bg:#12171a;--card:#1b2227;--ink:#e8edea;--mut:#92a09a;--line:#2b353b;--ok:#4cc16a;--okbg:#17321f;--bad:#f0645a;--badbg:#3a1b19;--acc:#6b9bff;--gold:#f0b429}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Inter,system-ui,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 40px}
+button{font:inherit;color:inherit;cursor:pointer}
+.top{position:sticky;top:0;background:var(--bg);padding:12px 0;display:flex;gap:14px;align-items:center;justify-content:space-between;z-index:5;border-bottom:1px solid var(--line)}
+.top b{font-weight:800}.stat{display:flex;gap:14px;font-weight:600;font-size:15px}
+h1{font-size:20px;margin:0}
+.sub{color:var(--mut);font-size:14px;margin:4px 0 14px}
+.btn{border:0;border-bottom:4px solid rgba(0,0,0,.25);border-radius:14px;padding:12px 18px;font-weight:800;background:var(--acc);color:#fff;text-transform:uppercase;letter-spacing:.03em;font-size:14px}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line);border-bottom-width:4px}
+.btn[disabled]{background:var(--line);color:var(--mut);border-bottom-color:transparent;cursor:default}
+.btn.full{width:100%}
+.unit{margin:18px 0}
+.uh{border-radius:16px;padding:14px 16px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.uh b{display:block;font-size:17px}.uh span{font-size:13px;opacity:.92}
+.les{display:flex;gap:16px;justify-content:center;padding:16px 0}
+.node{width:68px;height:68px;border-radius:50%;border:0;border-bottom:6px solid rgba(0,0,0,.28);font-size:26px;color:#fff;font-weight:800;position:relative}
+.node.lock{background:var(--line)!important;color:var(--mut);border-bottom-color:rgba(0,0,0,.12);cursor:default}
+.node.cur{box-shadow:0 0 0 6px color-mix(in srgb,currentColor 0%,transparent),0 0 0 4px var(--bg),0 0 0 7px var(--gold)}
+.tools{display:flex;gap:10px;margin:8px 0}
+.tools .btn{flex:1}
+.bar{height:14px;background:var(--line);border-radius:9px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.quiz{display:none;position:fixed;inset:0;background:var(--bg);z-index:20;overflow-y:auto}
+.quiz.on{display:block}
+.qin{max-width:560px;margin:0 auto;padding:14px 16px 190px;min-height:100%}
+.qh{display:flex;gap:12px;align-items:center;margin-bottom:22px}
+.x{background:none;border:0;font-size:24px;color:var(--mut);padding:4px 8px}
+.qt{font-size:12px;color:var(--mut);font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.qq{font-size:20px;font-weight:800;margin:0 0 20px}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:14px 16px;margin-bottom:10px;font-size:16px}
+.opt.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,var(--card))}
+.opt.good{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt[disabled]{cursor:default}
+.slots{min-height:50px;border-radius:14px;border:2px dashed var(--line);padding:8px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
+.slots .opt{margin:0}
+.slots .hint{color:var(--mut);font-size:14px;padding:6px}
+.fb{position:fixed;left:0;right:0;bottom:0;padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:30;border-top:1px solid var(--line);background:var(--card)}
+.fb.ok{background:var(--okbg)}.fb.bad{background:var(--badbg)}
+.fbi{max-width:560px;margin:0 auto}
+.fbt{font-weight:800;font-size:18px;margin-bottom:4px}.fb.ok .fbt{color:var(--ok)}.fb.bad .fbt{color:var(--bad)}
+.fbe{font-size:14px;max-height:28vh;overflow-y:auto;margin-bottom:6px}
+.fbr{font-size:12px;color:var(--mut);margin-bottom:10px}
+.end{text-align:center;padding-top:40px}
+.end .big{font-size:56px}.end h2{margin:8px 0}
+.cards{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.cards div{flex:1;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 6px}
+.cards b{display:block;font-size:22px}.cards span{font-size:12px;color:var(--mut)}
+.foot{color:var(--mut);font-size:12px;text-align:center;margin-top:30px}
+.sec{margin:20px 0 8px;font-size:13px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:var(--card);border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;padding:14px;text-align:left}
+.mode b{display:block;font-size:16px}.mode span{font-size:13px;color:var(--mut)}
+.mode.hot{border-color:var(--gold)}
+.mode.wide{grid-column:1/3}
+.dr{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.dr span{color:var(--gold);letter-spacing:2px;white-space:nowrap;font-size:13px}
+.tg{white-space:nowrap;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink)}
+.tg input{width:20px;height:20px}
+.num{width:100%;font:inherit;font-size:22px;font-weight:800;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);margin-bottom:10px}
+.num:focus{outline:0;border-color:var(--acc)}
+.ansbox{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:16px;font-size:20px;font-weight:800;margin-bottom:10px}
+.tm{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:-10px 0 16px}
+.tm i{display:block;height:100%;background:var(--bad);width:100%}
+.dn{background:var(--okbg);border:2px solid var(--ok);border-radius:12px;padding:9px 12px;margin-bottom:6px;font-size:14px}
+.row2{display:flex;gap:10px}.row2 .btn{flex:1}
+.qrh{margin:22px 0 6px;padding:14px;border-radius:18px;background:color-mix(in srgb,var(--card) 70%,#0b1220 30%);border:2px solid var(--line)}
+.qh2{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}.qh2 b{font-size:18px}.qh2 span{font-size:12px;color:var(--mut)}
+.dr small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.lamps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-6px 0 14px}
+.lamps em{font-style:normal;color:var(--mut);font-weight:800}
+.lamps.big{justify-content:center;padding:26px 0;margin:0 0 18px;background:#111;border-radius:16px}
+.lamps.big .ann{transform:scale(1.6);transform-origin:center}
+.ann{display:inline-flex;align-items:center;justify-content:center;background:#050505;border:1px solid #333;border-radius:3px;padding:6px 10px;font:700 13px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em;white-space:nowrap}
+.ann.r{color:#ff3b30}.ann.a{color:#ffc21a}.ann.g{color:#3ee26a}
+.ann.ab{color:#ffc21a;border:2px solid #ffc21a;font-size:15px}
+.ann.ar{color:#050505;background:#ffc21a;border-color:#ffc21a;font-size:16px;padding:4px 8px}
+.ann.o{background:#f39a1e;color:#111;border-color:#f39a1e}
+.ann.rv{flex-direction:column;padding:4px 6px;color:#ff3b30;gap:1px}.ann.rv b{font-size:11px;line-height:1.05}
+.ann.ha,.ann.hg{flex-direction:column;padding:0;width:62px;overflow:hidden}
+.ann.ha i,.ann.hg i{display:block;width:100%;height:16px;background:repeating-linear-gradient(135deg,#ffc21a 0 4px,#050505 4px 8px)}
+.ann.hg i{background:repeating-linear-gradient(135deg,#9aa 0 4px,#050505 4px 8px)}
+.ann.ha b,.ann.hg b{padding:5px 4px;font-size:11px}.ann.ha b{color:#ffc21a}.ann.hg b{color:#3ee26a}
+.ann.y{flex-direction:column;background:transparent;border:0;gap:3px;color:var(--ink);padding:2px 4px}
+.ann.y i{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6a8,#ffd400 55%,#b38f00);border:2px solid #333}
+.ann.y b{font-size:10px}
+.gauge{display:inline-block;background:#050505;color:#fff;border:1px solid #333;border-radius:4px;padding:5px 8px;font:700 12px ui-monospace,Menlo,monospace}
+.opt.lop{text-align:center;background:#111;border-color:#333}
+.opt.lop.sel{border-color:var(--acc)}.opt.lop.good{border-color:var(--ok)}.opt.lop.bad{border-color:var(--bad)}
+.u-li{color:#e5322d;font-weight:800}.u-la{color:#f07c00;font-weight:800}.u-ld{font-weight:800;text-decoration:underline}.u-cf{color:#1f9d3a;font-weight:800}
+.fbe .ann{vertical-align:middle;margin-right:4px}
+.lop .ann.y,.lamps.big .ann.y{color:#eee}
+.qrh.fm{background:color-mix(in srgb,var(--card) 80%,#0f3d2e 20%)}
+</style></head><body>
+<div class="wrap" id="home"></div>
+<div class="quiz" id="quiz"></div>
+<script>
+/* ===== QRH H215 COUGAR (Rev 1.0, 15 Sep 2025) — English only ===== */
+/* Annunciators: [id, text, style, group, meaning, tab]
+   style: r red, a amber, g green, ha hatched amber, hg hatched green, y round yellow lamp, o orange MFD message, rv red vertical, ab amber boxed, ar amber arrow */
+const LIGHTS=[
+['BATT','BAT T°','r','warn','Battery temperature exceeds 70 °C','20'],
+['BF1','B FIRE 1','r','warn','Fire in MGB compartment (confirmed by B FIRE 2)','2'],
+['BF2','B FIRE 2','r','warn','Fire in MGB compartment (confirmed by B FIRE 1)','2'],
+['DIFF','DIFF NG','r','warn','NG difference between the two engines ≥ 2500 rpm (7.5 %)','4'],
+['DCF','DC FAIL','r','warn','Failure of both ALT + TR. Shedding of DC consumers required','22'],
+['EP1','ENG P1','r','warn','Oil pressure drop in LH engine','7'],
+['EP2','ENG P2','r','warn','Oil pressure drop in RH engine','7'],
+['F1','FIRE 1','r','warn','Fire in LH engine bay','1'],
+['F2','FIRE 2','r','warn','Fire in RH engine bay','1'],
+['MGBP','MGB P','r','warn','Oil pressure drop below 0.4 bar in MGB','13'],
+['WARN','WARN','r','misc','Red warning light illuminated on the instrument panel','—'],
+['LG','L/G','r','misc','Landing gear not extended with IAS < 60 kt','19'],
+['PWR1','PWR1','rv','misc','Power of the remaining engine increases automatically after a single-engine failure','8'],
+['PWR2','PWR2','rv','misc','Power of the remaining engine increases automatically after a single-engine failure','8'],
+['CAUT','CAUT','a','misc','Amber caution light illuminated on the instrument panel','—'],
+['ICE','ICE','ab','misc','Icing zone detected','36'],
+['AWARN','A WARN','a','caut','No power supply to aural warning system','35'],
+['COM','COM','a','caut','Failure of the communication system','—'],
+['COWLS','COWLS','a','caut','One or more cowlings (engine, MGB…) open or improperly locked','34'],
+['DEICE','DEICE','a','caut','Failure of anti-icing engine air intakes and rotors ice protection system','36'],
+['DEICT','DEIC.T°','a','caut','Rotors ice protection systems are operating with OAT > 0 °C','38'],
+['DOORS','DOORS','a','caut','Door(s) open: sliding door, pilot’s, copilot’s or cargo bay door','34'],
+['ELEC','ELEC','a','caut','Electric power system fault (loss of TR, ALT, BAT or DC bus tie connect)','20'],
+['E1CH','ENG1 CH','a','caut','Chips detected in engine 1','10'],
+['E2CH','ENG2 CH','a','caut','Chips detected in engine 2','10'],
+['FIRED','FIRE D','a','caut','28 V power loss or fire detector fault in LH/RH engine bay or MGB compartment','2'],
+['FMS','FMS','a','caut','Failure of flight navigation system','—'],
+['FUEL','FUEL','a','caut','Fuel system fault: check fuel management panel (pressure drop, low level or filter clogging)','12'],
+['GPU','GPU','a','caut','External power receptacle flap open','34'],
+['GRD','GRD/FLT','a','caut','Fault in ground/flight logic system generated by landing gear sensors','34'],
+['HYD','HYD','a','caut','Hydraulic system fault: check hydraulic system control panel','16'],
+['ICED','ICE D','a','caut','Ice detection system fault','36'],
+['IGBT','IGB T°','a','caut','IGB oil temperature exceeds 120 °C','14'],
+['MGBC','MGB C','a','caut','MGB oil pressure below 3 bar: loss of main lubrication system and of oil cooling','13'],
+['MGBCH','MGB CH','a','caut','Metal particles present in MGB','14'],
+['MGBT','MGB T°','a','caut','MGB oil temperature exceeds 145 °C','14'],
+['MPAI','MPAI','a','caut','Malfunction of electric multipurpose air intakes','35'],
+['PITOTS','PITOTS','a','caut','Anti-icing system loss or pitot head fault: check light on sub-panel','32'],
+['PWCPT','PW CPT','a','caut','Power computer failure','11'],
+['RBSAFE','RB SAFE','a','caut','Rotor brake control lever in braking position or not properly in safe gate','33'],
+['ROTBR','ROT BR','a','caut','Hydraulic pressure in rotor brake system','33'],
+['SERVO','SERVO','a','caut','Seizing of one or more main/tail rotor servocontrols, or loss of one cylinder in tail servocontrol','16'],
+['TGBT','TGB T°','a','caut','TGB oil temperature exceeds 120 °C','14'],
+['THROT','THROT','a','caut','One or both fuel flow control levers not set to automatic governing position','33'],
+['TRNG','TRNG','a','caut','Training function in use','11'],
+['WDSCR','WDSCR','a','caut','Anti-icing loss on one or more windshield panels: check light on sub-panel','34'],
+['AUXHP','AUX.HP','a','hyd','Pressure drops in auxiliary hydraulic system pump','16'],
+['AUXP','AUX.P','a','hyd','Auxiliary system electric pump disconnected','16'],
+['LHHMP','LH.HMP','a','hyd','Pressure drops in LH hydraulic system pump','16'],
+['APHP','AP.HP','a','hyd','Pressure drops in AP hydraulic system','18'],
+['LHP','LH.P','a','hyd','Pressure drops in LH hydraulic system','17'],
+['LHLEV','LH.LEV','a','hyd','Hydraulic fluid level less than 4 litres in LH reservoir','17'],
+['RHP','RH.P','a','hyd','Pressure drops in RH hydraulic system','16'],
+['RHLEV','RH.LEV','a','hyd','Hydraulic fluid level less than 2 litres in RH reservoir','16'],
+['BLD','BLD','g','sub','LH or RH engine bleed valve open','10'],
+['OFS','OFS','g','sub','LH or RH bleed valve closing control threshold offset','10'],
+['OVSP','OVSP','ha','sub','Free turbine overspeed (light FLASHES) or overspeed sensor not set, N2 below 15 % (light STEADY)','9'],
+['GOV','GOV','ha','sub','Loss of redundancy in RH or LH engine governor','9'],
+['NORMG','NORM','hg','sub','Test sequence correct','—'],
+['NORMA','NORM','ha','sub','Failure of one N2 overspeed circuit','—'],
+['SPLYA','SPLY','ha','sub','Emergency battery overheating or supply failure','24'],
+['SPLYG','SPLY','hg','sub','Emergency battery supplying aircraft system','24'],
+['START','START','g','sub','Engine starting light','—'],
+['PRESS','PRESS','a','fuel','Low fuel pressure (P < 150 mbar)','12'],
+['FILT','FILT','a','fuel','Fuel filter clogging (ΔP = 140 mbar)','12'],
+['LOWF','↓','ar','fuel','Fuel low level (feeder tank below about 90 litres)','12'],
+['TR1','TR.1','y','elec','Transformer-rectifier 1 failure','22'],
+['TR2','TR.2','y','elec','Transformer-rectifier 2 failure','22'],
+['ALT1','ALT.1','y','elec','Alternator 1 failure','23'],
+['ALT2','ALT.2','y','elec','Alternator 2 failure','23'],
+['BATL','BAT','y','elec','Main battery failure','20'],
+['IBAR','INTER-BAR','y','elec','Coupling (inter-bar) contactor open','21'],
+['SHED','SHEDDING','y','elec','SHEDDING light (DC consumer shedding)','21'],
+['CMFD','CHECK MFD','o','mfd','FND/NAVD cross monitoring fault','27'],
+['CVNE','CHECK VNE','o','mfd','No VNE computation: the red line is frozen on the absolute VNE','27'],
+['COLL','COLL LINK','o','mfd','Decoupling of collective/yaw, roll and pitch axis inactive','27'],
+['AHRSX','AHRS ↔','o','mfd','Loss of consistency between the AHRS','28'],
+['ADCX','ADC ↔','o','mfd','Total pressure ports of a pitot head obstructed (ADC discrepancy)','28'],
+['XXXX','XXXX ↔','o','mfd','Sensor cross-talk discrepancy','27'],
+['AHRSR','AHRS 1','r','mfd','One AHRS failure','26'],
+['ADCR','ADC 1','r','mfd','One ADC failure','27'],
+['FCPR','FCP 1','r','mfd','One FCP failure: altimeter, course and DH/DA settings revert to power-up settings','26'],
+['LOCR','LOC 1','r','mfd','LOC failure: check with another navigation system','26'],
+['RAD','RAD','rv','mfd','Radio altimeter failure','25'],
+['MFDF','MFD SEVERE FAILURE','r','mfd','Display failure','25'],
+['CEID','CHECK EID','a','vms','Loss of EID cross talk','31'],
+['SOEID','SWITCH OFF EID 1','a','vms','One EID failure: switch off the failed EID','31'],
+['EIDF','EID FAIL','r','vms','One EID failure','31'],
+['CAMC','CHECK AMC','a','vms','AMC failure or discrepancy: set AMC switch 1/N/2 on RCU to valid position','31'],
+['CFQ','CHECK FUEL QUANTITY','a','vms','Fuel subsystem failure: anomaly between fuel gauges and fuel flow computation','31']
+].map(a=>({id:a[0],t:a[1],s:a[2],g:a[3],m:a[4],tab:a[5]}));
+const LMAP={};LIGHTS.forEach(l=>LMAP[l.id]=l);
+/* Urgency wording (QRH introduction) */
+const URG={LI:'LAND IMMEDIATELY',LA:'LAND AS SOON AS POSSIBLE',LD:'LIMIT DURATION OF FLIGHT',CF:'CONTINUE THE FLIGHT'};
+/* qm(lights, question, [correct, wrong, wrong, wrong], explanation, ref) · qt(lights, statement, true/false, explanation, ref)
+   lights: annunciator ids, or '#text' for a gauge reading */
+const qm=(l,q,o,e,r)=>({t:'mc',l,q,o,e,r,en:1}), qt=(l,q,a,e,r)=>({t:'tf',l,q,a,e,r,en:1});
+const QUNITS=[
+{n:'Urgency terms & general',d:'Land immediately … continue',c:'#334155',q:[
+ qm([],'What does LAND IMMEDIATELY mean?',['Continued flight may not be possible. Ditching or landing in hazardous terrain is preferable to continuing flight','Land at the nearest site where a safe landing can be accomplished','Land at the nearest site where technical assistance may be expected','Extended flight is not recommended'],'This is the most urgent of the four QRH terms.','QRH Introduction'),
+ qm([],'What does LAND AS SOON AS POSSIBLE mean?',['Land at the nearest site where a safe landing can be accomplished','Ditching is preferable to continuing flight','Landing site and duration of flight are at the pilot’s discretion','Continue to destination'],'Second level of urgency.','QRH Introduction'),
+ qm([],'What does LIMIT DURATION OF FLIGHT mean?',['Extended flight is not recommended. Land at the nearest site where technical assistance may be expected; site and duration at pilot’s discretion','Land at the nearest safe site','Land immediately, even in hazardous terrain','No restriction, continue the mission'],'Third level of urgency.','QRH Introduction'),
+ qm(['WARN','CAUT'],'WARN or CAUT illuminates. How is it acknowledged?',['Press the light on either panel — this resets the caution alerting function','Pull the circuit breaker','Switch the AMC to N','It goes out by itself after 10 s'],'Pressing the light resets the alerting function for the next failure.','QRH Introduction, note'),
+ qm([],'A circuit breaker has popped. When may it be reset?',['Only if the affected system is required for flight, only once, and only if there is no indication of electrical fire','Always, up to three times','Never in flight','Only after landing'],'The electrical chapter repeats it: do not perform more than one reset attempt.','QRH Introduction, note; Tab 20'),
+ qm([],'Rotor speed aural warning range (underspeed):',['75.5–92.5 % (200–245 rpm)','83–92.5 %','92.5–103.8 %','60–75 %'],'Overspeed aural warning: above 109.5 % (290 rpm).','QRH Aural warning'),
+ qm(['LG'],'When does the landing gear aural warning sound?',['Gear not extended with airspeed 60 kt or less AND height 300 ft (90 m) or lower','Gear not extended below 500 ft','Gear extended above 110 kt','Gear not extended below 100 kt'],'It sounds for 3 s, is reactivated at 10 ft (3 m) and can be silenced with the L/G pushbutton. L/G flashes as soon as IAS < 60 kt.','QRH Aural warning'),
+ qm([],'When does the power-limit gong sound?',['When MCP or TOP (whichever applicable) is exceeded','When NR exceeds 109.5 %','When OEI 2 min 30 s starts','When TOT exceeds 750 °C'],'Gong = power limit exceeded.','QRH Aural warning'),
+ qm([],'Pulling the EMERGENCY CUT-OFF gang bar backward:',['Cuts off the main battery and alternators 1 and 2; isolates all consumers except bus bars PP1 and PP11 (direct battery)','Shuts down both engines','Cuts off everything including the emergency battery','Extends the landing gear'],'Used in smoke and electrical failure procedures.','QRH Emergency cut-off gangbar'),
+ qm([],'When may the GENERAL CUT-OUT handle be used?',['Only on the ground, or very close to the ground in the event of a hazardous landing','At any altitude for a fire','For a single engine failure in cruise','To reset the AFCS'],'It shuts off both engines and all electrical consumers except fire extinguishing, cockpit utility lights, emergency gear extension and emergency-battery consumers.','QRH General cut-out handle'),
+ qt([],'Doors and emergency exits should be jettisoned before touchdown in an emergency landing or ditching.',false,'CAUTION: do NOT jettison before touchdown, to prevent possible impact with the rotors.','QRH Emergency evacuation'),
+ qm([],'Which consumers stay powered after pulling the GENERAL CUT-OUT handle?',['Engine fire extinguishing, cockpit utility lights, emergency L/G extension, emergency-battery consumers (ISIS, triple indicator…)','Both engines and the AFCS','Only the radios','Nothing at all'],'Both engines are shut off.','QRH General cut-out handle')]},
+{n:'Fires & smoke',d:'Tabs 1–3',c:'#b91c1c',q:[
+ qm(['WARN','F1'],'FIRE 1 with WARN and aural on the ground. First action?',['Fuel shutoff valve — CLOSE','Rotor brake — APPLY','GENERAL CUT-OUT handle — PULL','Booster pumps — OFF'],'Then NORM extinguisher push in, both fuel flow levers SHUTDOWN, booster pumps OFF, heater OFF…','QRH Tab 1'),
+ qm(['F2'],'Engine fire on the ground: FIRE light remains on after the first extinguisher. Next action?',['Illuminated EMER fire extinguisher switch — PUSH IN','Restart the engine','Wait 5 minutes','Open the cowlings'],'Then evacuation announcement, GENERAL CUT-OUT handle PULL, evacuate, fight fire from outside.','QRH Tab 1'),
+ qm(['F1'],'Engine fire during take-off, in hover or approach, when a safe landing is possible:',[URG.LI,URG.LA,'Climb to safe altitude first','Continue to destination'],'When the aircraft is stopped, follow the ground fire procedure.','QRH Tab 1'),
+ qm(['F2'],'Engine fire in flight: what is the first item before acting on the affected engine?',['Attain single engine flight condition','Pull the GENERAL CUT-OUT handle','Press EMER extinguisher','Lower the landing gear'],'Then: fuel shutoff valve close, NORM push in, chronometer start, fuel flow lever shutdown, booster pumps OFF, discharge light check, heater OFF.','QRH Tab 1'),
+ qm(['F1'],'Engine fire in flight, actions done, the FIRE light goes out. Urgency?',[URG.LA,URG.LI,URG.LD,URG.CF],'If FIRE does not go out after 1 min: EMER extinguisher; if still on after 1 min: LAND IMMEDIATELY.','QRH Tab 1'),
+ qm(['F1'],'Why is the chronometer started in the in-flight engine fire procedure?',['To time 1 min before using the EMER extinguisher if the FIRE light stays on','To time the OEI 2 min 30 s rating','To time the restart','To log fuel consumption'],'"If the FIRE light does not go out after 1 min" — EMER push in.','QRH Tab 1'),
+ qm(['WARN','BF1'],'Only B FIRE 1 illuminates (with WARN and aural). What is it and what do you do?',['Possible detection fault or false alarm: watch the second B FIRE light — '+URG.LD,'MGB fire: '+URG.LI,'Engine fire: close fuel shutoff valve','Ignore it'],'A real MGB fire is confirmed by both B FIRE 1 and B FIRE 2 (they may illuminate a few seconds apart).','QRH Tab 2'),
+ qm(['WARN','BF1','BF2'],'B FIRE 1 + B FIRE 2. Actions?',['Landing gear DOWN — '+URG.LI+' — after landing: evacuation announcement, GENERAL CUT-OUT handle PULL','Push NORM extinguisher and continue','Reduce power to Vy and continue','Shut down engine 1'],'Fire in MGB compartment.','QRH Tab 2'),
+ qm(['CAUT','FIRED'],'CAUT + FIRE D. What is the first action?',['Perform the 4 FIRE tests (engines and MGB)','Land immediately','Pull fire extinguisher','Shut down both engines'],'One test incorrect → LIMIT DURATION. All OK, or lamp stays lit after good tests (reversal to secondary supply) → CONTINUE.','QRH Tab 2'),
+ qm([],'Smoke in the helicopter on the ground or in hover over a possible landing site:',[URG.LI+': EMERGENCY CUT-OFF gangbar PULL, fuel flow levers SHUTDOWN, all electrical power levers OFF, booster pumps OFF, open all doors','Fly at Vy and open windows','Switch ventilation on and continue','Pull the gangbar and continue the flight'],'RFM 3.1 §10.1. NOTE: QRH Rev 1.0 shows the GENERAL CUT-OUT handle here — the approved RFM says the EMERGENCY CUT-OFF gangbar.','RFM 3.1 §10.1 / QRH Tab 3'),
+ qm([],'Smoke of NON-electrical origin, immediate landing impossible:',['Fly ≈ Vy, ventilation ON, cockpit ventilation outlets OPEN, cockpit sliding windows CLOSE — '+URG.LA,'Fly ≈ Vy, windows OPEN, sideslip','Gangbar AFT immediately','Descend at VNE'],'Electrical smoke differs: Vy, sliding windows OPEN, induce a sideslip, then isolate sources.','RFM 3.1 §10.2.1'),
+ qm([],'Smoke of ELECTRICAL origin: first three items?',['Fly ≈ Vy — cockpit sliding windows OPEN — induce a sideslip','Land immediately — cut-out handle — evacuate','Ventilation ON — outlets OPEN — windows CLOSE','Battery OFF — alternators OFF — TRs OFF'],'Then the isolation flowchart: battery first, then alternators, then TRs. NOTE: QRH Rev 1.0 says CLOSE the windows — the approved RFM 3.1 §10.2.2 says OPEN.','RFM 3.1 §10.2.2 / QRH Tab 3'),
+ qm([],'Electrical smoke flowchart, first step:',['EMERG CUT-OFF: ALT.1, ALT.2, BAT switches AFT; EMERG.BAT SPLY; ALT.1, ALT.2, TR.1, TR.2 OFF; COUPLING OFF','BATT.EXT.PWR OFF only','TR.1 OFF only','Pull GENERAL CUT-OUT handle'],'If smoke does not diminish: everything back FORWARD/ON, EMERG.BAT FORCED, BATT.EXT.PWR OFF, LAND ASAP.','QRH Tab 3'),
+ qm([],'Why must you be configured for 85 % N1 before setting both the gangbar and BAT/EXT.PWR off?',['Engine electronic governing loses power and both engines go to an intermediate value (≈85 %); only the pilot triple indicator NR/N2 remains','The rotor brake engages','Both engines flame out','The AFCS disengages only'],'Emergency governing mode — CAUTION in Tab 3.','QRH Tab 3'),
+ qm([],'Electrical smoke: in which order are components isolated?',['Battery, then alternators, then TRs','TRs, then battery, then alternators','Alternators, then TRs, then battery','All at once'],'Wait long enough between steps to make sure no smoke reappears.','QRH Tab 3, note')]},
+{n:'Engine failures',d:'Tabs 4–7',c:'#047857',q:[
+ qm(['WARN','DIFF','EP1','PWR2'],'Typical symptoms of a single engine failure?',['N1 may drop (sometimes to IDLE), TOT and torque drop, NR may drop with NR min aural, PWR light of the remaining engine','TOT rises sharply on the failed engine','Both N1 increase','MGB P and MGB C'],'The remaining engine power increases automatically (PWR1/PWR2).','QRH Tab 4'),
+ qm([],'A yellow clock flag appears on the EID after a single engine failure. Meaning?',['Intermediate contingency rating exceeded; it flashes 5 s before the time limit; after 2 min 30 s the circle is full and fixed','Fuel low level','MCP exceeded on both engines','Training mode active'],'Reduce to OEI CONT before the limit.','QRH Tab 4, note'),
+ qm([],'Increasing collective after an engine failure, NR drops below 83 %. Consequence?',['Loss of electric power supply (except battery)','Automatic restart','Rotor brake application','Nothing'],'Keep NR — "Control NR".','QRH Tab 4, note'),
+ qm([],'What does VTOSS indicate (with actual weight inserted)?',['Minimum airspeed for a 100 ft/min rate of climb at OEI 2 min 30 s rating','Best range speed','Maximum speed with doors open','Vy + 10 kt'],'Vy is the speed requiring minimum power. OEI level flight may not be possible.','QRH Tab 4, note'),
+ qm([],'Engine failure in hover IGE, landing. Steps?',['Control attitude and cushion touchdown; after touchdown neutralize cyclic and collective to minimum; apply wheel brakes','Increase speed to 30 kt nose-down','Climb out at Vtoss','Autorotate'],'Continued flight may be possible — LIMIT DURATION.','QRH Tab 4'),
+ qm([],'Engine failure in hover OGE, landing: what airspeed do you gain?',['At least 30 kt (more if height permits, but not above 40 kt), nose-down up to 15–20° max','60 kt','Vy + 10 kt','Stay at zero speed'],'Simultaneously control NR. Near the ground level off, reduce speed, cushion touchdown.','QRH Tab 4'),
+ qm([],'Engine failure during take-off with airspeed below 45 kt (before V1):',['Reject: rotate nose up before V1, maintain NR with collective, cushion, neutralize cyclic, collective minimum, brakes','Continue to Vtoss','Accelerate to Vy','Autorotate with gear up'],'Above 45 kt (after V1): establish Vtoss, NR 92.5 %, climb and accelerate to Vy.','QRH Tab 4'),
+ qm([],'Engine failure during take-off above 45 kt (after V1): NR to maintain with collective?',['92.5 %','100 %','83 %','109 %'],'Adjust pitch to Vtoss; when obstacles cleared, accelerate to Vy. LIMIT DURATION.','QRH Tab 4'),
+ qm([],'Engine failure during approach, landing: airspeed to control?',['Around 40 kt','Vy','60 kt','Vtoss'],'Control NR, heating OFF, failed engine booster pump OFF, gear down, nose wheel locked, parking brake released.','QRH Tab 5'),
+ qm([],'Engine failure on approach: continued flight is possible if, at the moment of failure, the height above ground is at least:',['50 ft (depending on OEI performance)','100 ft','300 ft','15 ft'],'Control NR and simultaneously gain climbing speed.','QRH Tab 5'),
+ qm([],'Intentional single engine shutdown after malfunction: collective pitch first reduced to about:',['14°','10°','16.5°','17.5°'],'Then heating OFF, shut down: fuel flow lever fast reduction gate SET, control NR, booster pumps OFF, fuel flow lever OFF.','QRH Tab 5'),
+ qm([],'Transferring fuel from the tank of the failed engine:',['Failed engine fuel shutoff control PULL, failed engine booster pumps ON, transfer pump ON','Booster pumps OFF, transfer pump OFF','Open the crossfeed with the engine running','Not permitted'],'LIMIT DURATION OF FLIGHT.','QRH Tab 5'),
+ qt([],'After an intentional shutdown caused by failure of the free-turbine governing sensors, an in-flight restart may be attempted.',false,'CAUTION: do NOT restart the engine in this case.','QRH Tab 6'),
+ qm([],'In-flight restart: the START annunciator goes out when gas generator speed reaches:',['45 %','23 %','65 %','17 %'],'OVSP light off at N2 = NR 23 %; ENG P off at 1.7 bar; TOT ≤ 750 °C during acceleration; THROT + DIFF NG off.','QRH Tab 6'),
+ qm([],'In-flight restart: airspeed?',['Approximately Vy','40 kt','Vtoss','VNE − 20 kt'],'Booster pumps ON, fuel pressure check, fuel flow lever in start detent, START, lever forward.','QRH Tab 6'),
+ qm([],'Dual engine failure while hovering:',['Hold level attitude, increase collective AS REQUIRED to cushion; after contact collective minimum, wheel brakes','Nose down to 40 kt','Pull GENERAL CUT-OUT in the air','Lower collective fully and keep it'],'QRH Tab 6.','QRH Tab 6'),
+ qm([],'Autorotation: collective is reduced to obtain NR below or equal to:',['109 % (290 rpm)','100 %','92.5 %','117 %'],'Check in the descent: gear down, nose wheel locked, parking brake released, artificial horizons zero set.','QRH Tab 6'),
+ qm([],'Autorotation final approach speed:',['Vy + 10 kt, into wind','Vy − 10 kt','Vtoss','40 kt'],'Flare at about 130 ft at maximum weight, 70 ft at light weight; adopt ≈15–20° nose-up.','QRH Tab 6'),
+ qm([],'Autorotation: wheel brakes after touchdown are applied:',['Below 30 kt','Immediately','Above 40 kt','Never'],'Collective to minimum after touchdown.','QRH Tab 6'),
+ qm([],'Autorotation over water — which is correct?',['Open sliding doors on approach; jettison exits after touchdown; apply rotor brake without decreasing collective','Gear down; jettison exits on approach','Unfasten belts before touchdown','Inflate life jackets inside the aircraft'],'Do not inflate life jackets until clear of the aircraft.','QRH Tab 7')]},
+{n:'Engine control & fuel',d:'Tabs 7–12',c:'#7c3aed',q:[
+ qm(['WARN','EP1','#ENG 1 OIL P 1.5 BAR'],'Engine oil pressure drop. Action?',['Apply INTENTIONAL SINGLE-ENGINE SHUT-DOWN AFTER MALFUNCTION (Tab 5) — '+URG.LD,'Reduce power and continue','Land immediately','Restart the engine'],'ENG P1/ENG P2 = oil pressure drop.','QRH Tab 7'),
+ qm(['#ENG 1 OIL P 6.2 BAR'],'Engine oil overpressure. Action?',['Reduce power; if pressure does not decrease, fuel flow lever to fast reduction gate — '+URG.LD,'Shut down immediately','Continue the flight','Land immediately'],'Before landing, if OEI rating likely: fuel flow lever of the reduced engine to Flight.','QRH Tab 7'),
+ qm(['#OIL T 120 °C'],'Excessive engine oil temperature. Action?',['Intentional single-engine shutdown (Tab 5) — '+URG.LD,'Reduce power only','Continue the flight','Land immediately'],'QRH Tab 8.','QRH Tab 8'),
+ qm(['#TOT 850 °C'],'TOT abnormally high. Action?',['Reduce power; then intentional single-engine shutdown (Tab 5) — '+URG.LD,'Increase NR','Continue','Land immediately'],'QRH Tab 8.','QRH Tab 8'),
+ qm(['DIFF','#N1 85.0 %','PWR1','EP1','OVSP'],'N1 not varying from 85 %, or tending to the 2 min 30 s rating, or oscillating. Which failure?',['Major governing system failure','Free turbine sensor failure','Minor governing failure','Power computer failure'],'The other engine governor compensates automatically.','QRH Tab 8'),
+ qm(['DIFF','PWR1','OVSP'],'Major governing failure: rotor speed to maintain?',['Between 94 % and 101 %','92.5–103.8 %','100 % exactly','83–109 %'],'Identify the engine by collective variation until PWR1/PWR2; use fuel flow lever / emergency range.','QRH Tab 8'),
+ qm([],'Major governing failure landing procedure — final approach:',['Move affected engine fuel flow control forward until its torquemeter shows 20 %','Set it to shutdown','Leave at fast reduction gate','Set both levers to flight'],'Descent: fast reduction gate. After landing: at 10° collective, shut down the affected engine.','QRH Tab 8'),
+ qm(['PWR1'],'PWR1 or PWR2 may also illuminate for NR:',['Below 94.3 % (250 rpm) or above 107.5 % (285 rpm)','Below 83 % only','Above 117 %','Between 94 and 101 %'],'Note in the governing malfunction procedure.','QRH Tab 8, note'),
+ qm(['DIFF','#N1 65.0 %','PWR2','GOV'],'DIFF NG + PWR + GOV: failure of the free turbine governing sensor. Action?',['Single engine failure procedure (Tab 4); if flight continued, intentional SE shutdown (Tab 5) — '+URG.LD,'Continue the flight','Restart the engine','Land immediately'],'And do not restart it later (Tab 6 caution).','QRH Tab 9'),
+ qm(['DIFF','#N1 0.0 %','OVSP'],'Engine stopped due to N2 overspeed. Before any relight you must:',['Visually check the transmission between free turbine and rotor if any doubt; press OVSP.1/OVSP.2 to reset (no relight while light flashes)','Relight immediately','Pull the cut-out handle','Nothing'],'Single engine failure procedure, LIMIT DURATION.','QRH Tab 9'),
+ qm(['OVSP'],'OVSP steady: loss of redundancy or overspeed protection default. Urgency?',[URG.CF,URG.LD,URG.LA,URG.LI],'QRH Tab 9.','QRH Tab 9'),
+ qm(['GOV'],'GOV alone (minor governing failure). Correct statement?',['No effect on power level, but probability of a major failure is increased — '+URG.CF,'Engine at 85 % fixed — land','Shut down the engine','Limit duration of flight'],'Loss of redundancy.','QRH Tab 9'),
+ qm(['DEICE'],'Failure of anti-icing engine air intakes. Action?',['Minimize flight time at OAT below +3 °C with visible humidity; set the engine air intake anti-icing switch OFF; check DEICE off — '+URG.CF,'Land immediately','Shut down the engine','Increase power'],'Engine flameout possible due to ice or snow ingestion.','QRH Tab 9'),
+ qm(['E1CH'],'ENG1 CH (VMS working normally). Action?',['Watch engine parameters (N1, TOT, oil T and P) — '+URG.CF,'Reduce power; fuel flow control to fast reduction gate — '+URG.LD,'Land immediately','Shut down with the fuel shutoff valve'],'RFM 3.6 §7. After landing check the magnetic plug. The "reduce power + fast reduction gate + LIMIT DURATION" action is RFM 3.3 §7.2, after TOTAL VMS FAILURE — QRH Rev 1.0 shows only that version.','RFM 3.6 §7 / QRH Tab 10'),
+ qm(['BLD'],'Bleed valve jammed OPEN. Consequences?',['Fuel consumption increased, power limited to MCR, thermal fatigue increased — '+URG.CF,'Surge hazard — avoid tailwind','Engine shutdown required','Land immediately'],'BLD seen for N1 above 88.2 % (BLD+OFS above 95.5 %).','QRH Tab 10'),
+ qm([],'Bleed valve jammed CLOSED. What to avoid?',['Fast engine acceleration and downwind flight (surge hazard)','Hover','Climb above 10,000 ft','Using AFCS'],'CONTINUE THE FLIGHT.','QRH Tab 10'),
+ qm(['PWCPT'],'PW CPT. Which lights remain valid?',['Only PWR1 or PWR2 for an active failure of the power regulation system; DIFF NG no longer driven by the power computer','DIFF NG only','All lights unchanged','None'],'Monitor engine parameters — CONTINUE THE FLIGHT.','QRH Tab 11'),
+ qm(['TRNG'],'Failure on training card (PMU): TRNG + T. Effect?',['Engine 2 limited to N1 = 99.4 % and OEI limits shifted on the N1 display; check training switch OFF','Engine 1 shut down','Both engines at 85 %','No effect'],'CONTINUE THE FLIGHT.','QRH Tab 11'),
+ qm([],'Collective pitch transmitter failure is indicated when the discrepancy exceeds:',['1.6°','0.5°','3°','5°'],'Collective pitch computed by the AFCS is displayed. CONTINUE.','QRH Tab 11'),
+ qm([],'Automatic starting device failure: TOT is kept below what value in continuous operation?',['750 °C','500 °C','795 °C','850 °C'],'Release START at N1 40–45 %, lever forward until ≈65 % N1.','QRH Tab 11'),
+ qm(['CAUT','FUEL','PRESS','#FUEL P 0.3 BAR'],'Low fuel pressure. Action and limit?',['Check booster pumps ON and CBs engaged — CONTINUE — altitude below 10,000 ft','Shut down the engine','Land immediately','Transfer fuel'],'Non-transferable fuel increases without booster pumps.','QRH Tab 12'),
+ qm(['CAUT','FUEL','FILT'],'FILT illuminates. Actions?',['Try to extinguish by reducing power; if still on, intentional SE shutdown on that engine — LIMIT DURATION — DO NOT TRANSFER FUEL','Transfer fuel to the other group','Continue the flight','Pull the shutoff'],'If FILT of the other circuit comes on too: '+URG.LA+'.','QRH Tab 12'),
+ qm(['LOWF'],'Fuel low level: pressing LONGI should show about how much in the feeder tank?',['90 litres (71 kg) — about 15 min at fast cruise, low altitude','60 litres','200 litres','30 litres'],'Keep the feeder tank reading not lower than 60 L (47 kg).','QRH Tab 12'),
+ qt(['LOWF'],'At high nose-up attitude the fuel low-level light may come on even if total fuel is above 90 litres.',true,'Reduce nose-up attitude to improve ejector transfer, or transfer between groups.','QRH Tab 12')]},
+{n:'Transmission & tail rotor',d:'Tabs 13–15',c:'#0e7490',q:[
+ qm(['MGBP','MGBC','#OIL P 0.4 BAR'],'MGB P + MGB C: total loss of MGB oil or failure of both pumps. Action?',['Reduce power to obtain IAS = Vy — '+URG.LI,'Reduce power — '+URG.LA,URG.LD,URG.CF],'On ground in cold weather (OAT below −10 °C) MGB P may stay on after start — abort the start.','QRH Tab 13'),
+ qm(['MGBC'],'MGB C alone (MGB oil cooling system fault). Actions?',['Reduce power; monitor MGB oil temperature and pressure on WCP','Land immediately','Shut down one engine','Continue at MCP'],'If MGB P lights: IAS = Vy, LAND IMMEDIATELY. If MGB T° lights: Tab 14.','QRH Tab 13'),
+ qm(['#MGB OIL P 8.0 BAR'],'MGB oil pressure high (8.0 bar): partial filter clogging. Urgency?',[URG.LD,URG.LI,URG.LA,URG.CF],'Monitor MGB P on the WCP.','QRH Tab 13'),
+ qm(['MGBT','#MGB T 145 °C'],'MGB T° on, VMS confirms 145 °C, power set for IAS = Vy, MGB T° stays on:',[URG.LA+' — maximum flight time 2 hours',URG.LD,URG.CF,URG.LI],'If MGB T° goes out at Vy: LIMIT DURATION. If VMS reading normal: CONTINUE.','QRH Tab 14'),
+ qm(['MGBCH'],'MGB CH. First action?',['Set the chip detector control unit switch to CHIP PULSE','Land immediately','Reduce to Vy','Shut down engine 1'],'If MGB CH goes off: CONTINUE. If it stays on: reduce power (≤ level-flight power at Vy) — LIMIT DURATION.','QRH Tab 14'),
+ qm([],'How many CHIP PULSE activations are permitted during a flight?',['One','Two','Three','Unlimited'],'After landing confirm by examining the plug.','QRH Tab 14, note'),
+ qm(['IGBT'],'IGB T° or TGB T° on. Action?',['In cruise reduce collective pitch to about 14° — '+URG.LA,'Continue the flight',URG.LI,'Reduce to Vy — '+URG.LD],'Oil temperature exceeds 120 °C on IGB or TGB.','QRH Tab 14'),
+ qm([],'Tail rotor control failure — symptoms?',['Uncommanded yaw and a stabilized sideslip of variable magnitude','Sudden strong yaw to the left','NR decay','TR vibration only'],'Control cable failure: a safety mechanism sets the blades to a safe pitch.','QRH Tab 15'),
+ qm([],'Tail rotor control failure in hover/low speed IGE:',['Immediately reduce collective, cushion touchdown; then control yaw with wheel brakes, cut-out handle if appropriate','Increase collective and climb','Accelerate to 60 kt','Autorotate from height'],'QRH Tab 15.','QRH Tab 15'),
+ qm([],'Tail rotor control failure in cruise: approach parameters?',['50–60 kt IAS, 9°–11° collective, ≈500 ft/min, slight sideslip to the left','Vy, 14° collective, 1000 ft/min','40 kt, 16°, hover landing','Autorotation at Vy + 10'],'First reduce collective to ≈13° and control heading with lateral cyclic; running landing.','QRH Tab 15'),
+ qm([],'Tail rotor FAILURE (loss of thrust) — symptom and action?',['Sudden significant yaw to the left — immediately begin autorotation; full autorotation landing, engines shut down, highest ground speed compatible with the site','Slow yaw — reduce collective to 13°','Right yaw — increase power','No yaw — continue'],'After touchdown control yaw with wheel brakes; cut-out handle if appropriate.','QRH Tab 15')]},
+{n:'Hydraulics & landing gear',d:'Tabs 16–19',c:'#4d7c0f',q:[
+ qm(['HYD','CAUT'],'Three basic hydraulic failure types per QRH?',['Pressure drop, fluid leakage, seizing of a servo-control distributor valve','Overheat, leak, vibration','Pump noise, low level, high pressure','Filter clog, leak, cavitation'],'Loss of one cylinder: control remains with the second cylinder.','QRH Tab 16'),
+ qm(['RHP','SERVO','#RH P 000 BAR'],'RH system pressure drop:',[URG.LA,URG.LI,URG.LD,URG.CF],'QRH Tab 16.','QRH Tab 16'),
+ qm(['LHHMP','AUXP'],'LH (main) system pressure drop. Action?',['EMERGENCY LANDING GEAR EXTENSION — '+URG.LA,'AUX.P OFF — continue','AP HYD OFF — continue',URG.LI],'Main system backed up by the auxiliary system (110–140 bar).','QRH Tab 16'),
+ qm(['AUXHP','#AUX 27 BAR'],'Auxiliary system pressure drop / aux pump failure:',['Press AUX.P pushbutton OFF — '+URG.CF,'Emergency gear extension — '+URG.LA,URG.LI,'AP HYD OFF'],'QRH Tab 16.','QRH Tab 16'),
+ qm(['RHLEV','SERVO'],'RH reservoir low fluid level (<2 L). Consequence and urgency?',['Loss of one cylinder of tail servo controls — '+URG.LA,'Total loss of hydraulics — '+URG.LI,'No consequence — '+URG.CF,'Loss of landing gear — '+URG.LD],'With RH.P + 000 bar: total RH system failure, same urgency.','QRH Tab 16'),
+ qm(['LHLEV','APHP','SERVO'],'LH reservoir low level. Consequences?',['Loss of one tail servo cylinder, loss of AP hydraulics, loss of normal gear extension, braking limited to ancillary accumulator','Only loss of AP','Loss of both main servo cylinders','No effect'],'AP HYD OFF, emergency gear extension, LAND ASAP.','QRH Tab 17'),
+ qm(['LHLEV','APHP','SERVO'],'Before landing with LH reservoir low level, ensure ancillary accumulator pressure is at least:',['120 bar','80 bar','90 bar','210 bar'],'CAUTION: below 120 bar consider wheel and rotor braking lost.','QRH Tab 17'),
+ qm(['LHP','LHLEV','LHHMP','APHP','AUXHP','AUXP','SERVO','#LH P 000 BAR'],'LH reservoir low level and zero pressure in LH system. Actions?',['AUX.P OFF, AP HYD OFF, emergency gear extension — '+URG.LA,'AP HYD OFF only — continue',URG.LI,'AUX.P ON — continue'],'Total LH system failure.','QRH Tab 18'),
+ qm(['APHP'],'AP.HP alone (pressure drop in AP hydraulic system):',['AP HYD switch (collective) OFF — '+URG.CF,URG.LA,'Emergency gear extension','AUX.P OFF'],'QRH Tab 18.','QRH Tab 18'),
+ qm(['#HYD 215 BAR'],'Over-pressure in RH or LH hydraulic system (or steady yellow-zone indication):',[URG.LD,URG.LA,URG.LI,URG.CF],'SERVO alone (servo command malfunction) is also LIMIT DURATION.','QRH Tab 18'),
+ qm(['SERVO'],'SERVO alone:',[URG.LD,URG.LA,URG.LI,URG.CF],'Servo command system malfunction.','QRH Tab 18'),
+ qm([],'Emergency L/G extension: full extension takes approximately:',['2 minutes','10 seconds','30 seconds','5 minutes'],'Handle PULL → PUMP light → selector down → 3 greens → handle down → PUMP off.','QRH Tab 19'),
+ qm([],'After emergency extension one green arrow is missing. How can downlock be checked?',['Reduce IAS below 60 kt: if L/G does not illuminate, the gear can be considered fully extended','Recycle the gear','Pull the cut-out','Land on the nose wheel'],'Main gear units extend desynchronized in emergency extension.','QRH Tab 19, note'),
+ qm([],'Landing gear retraction failure. Actions?',['Selector down, land and taxi a short distance in a straight line to centre the nose gear, take off and try again; if unsuccessful, no further attempts','Pull emergency handle','Continue with gear in transit','Cycle the gear 5 times'],'Gear down impairs level-flight speed and fuel consumption.','QRH Tab 19'),
+ qm([],'Landing with gear up — before crew actions:',['Hover over a level site at minimum safe fuel; parking brake applied, side doors (except stairway) opened, passengers evacuate','Land at high speed on grass','Jettison doors in flight','Autorotate'],'Crew: ease onto ground, collective minimum, cut-out handle, rotor brake, leave when rotor stopped.','QRH Tab 19')]},
+{n:'Electrical system',d:'Tabs 20–25',c:'#a16207',q:[
+ qm(['CAUT','ELEC'],'Reset policy in electrical failures?',['If an item is to be reset, do not perform more than one attempt','Up to three attempts','Never reset','Reset every 5 minutes'],'CAUTION at the start of the electrical chapter.','QRH Tab 20'),
+ qm(['BATL'],'Main battery failure. First action?',['EMERG BATT switch FORCED, then try to reset BATT.EXT.PWR','Gangbar AFT','Land immediately','TR.1 OFF'],'If BAT lights stay on: BATT.EXT.PWR OFF; if they go out: EMERG BATT NORM. CONTINUE.','QRH Tab 20'),
+ qm(['BATL'],'Main battery failure: which is lost (circuits directly on PP1/PP11)?',['Engine starting, engine RH booster pumps, standby signalling panel, fire extinguisher, emergency L/G extension, VHF 2','Both TRs','AFCS','All lighting'],'Essential and secondary bars remain supplied by the two TRs.','QRH Tab 20'),
+ qm(['BATT'],'BAT T° stays on after EMERG BATT FORCED and BATT.EXT.PWR OFF:',[URG.LA,URG.LD,URG.LI,URG.CF],'If it goes out: LIMIT DURATION.','QRH Tab 20'),
+ qm([],'Total DC failure: emergency battery takes over its consumers. What happens to N1?',['N1 is fixed to 85 %','Engines shut down','N1 at idle','No change'],'Note in Tab 20.','QRH Tab 20, note'),
+ qm(['TR2','BATL','IBAR','SPLYA','SHED'],'Essential bus DC short-circuit. Order of actions?',['BAT switch of EMERG CUT-OFF bar AFT, TR.2 OFF, COUPLING OFF — keep BATT.EXT.PWR ON — emergency gear extension — '+URG.LA,'TR.1 OFF, COUPLING OFF — limit duration','Gangbar fully AFT, BATT.EXT.PWR OFF','ALT.1 OFF, do not rearm'],'Battery below 22 V: total electrical failure may be imminent — configure for 85 % N1.','QRH Tab 21'),
+ qm(['TR1','IBAR'],'Secondary bus DC short-circuit. Actions?',['TR.1 OFF, COUPLING OFF — keep BATT.EXT.PWR ON — '+URG.LD,'TR.2 OFF — land ASAP','BAT AFT — emergency gear','Continue without action'],'PITOTS (+ HYD on ground) illuminate.','QRH Tab 21'),
+ qm(['TR1'],'Failure of one TR, reset unsuccessful:',['TR switch OFF — '+URG.CF,URG.LA,URG.LD,'Gangbar AFT'],'The whole system is supplied by the remaining TR.','QRH Tab 22'),
+ qm(['DCF','TR1','TR2','IBAR'],'Failure of both TRs: remaining flying time is at least 30 min if…',['Intentional shedding action is done within 1 min','Both alternators are reset','The battery is FORCED','The gear is retracted'],'Gear EXTENDED, SHEDDING OFF (FIRE D illuminates), try reset; if impossible TRs OFF, reduce consumption — LAND ASAP.','QRH Tab 22'),
+ qm(['DCF','TR1','TR2','IBAR'],'UZB aircraft, both TRs failed: equipment limits per APP.2.5?',['Side wiper 2 min, landing light 3 min (5 min on S/N 3071, 3076, 3104, 3108, 3111), V/UHF ARC 210 5 min; no aux hydraulic pump for the gear, no public address','VHF 5 min, landing light 5 min, side wiper 3 min (basic RFM only)','No limits','Landing light 1 min only'],'Basic RFM/QRH: VHF 5, landing light 5, side wiper 3, booster pumps 2 and 4 during landing 5 min. The UZB appendix supplements and modifies these for your aircraft.','APP.2.5 UZB 3.8 §9 / QRH Tab 22'),
+ qm(['ALT1'],'Failure of one alternator, reset unsuccessful:',['ALT switch OFF — '+URG.CF,URG.LA,'TR switches OFF','Gangbar AFT'],'All systems supplied by the remaining alternator.','QRH Tab 23'),
+ qm(['DCF','ALT1','ALT2','TR1','TR2','IBAR'],'Both alternators failed: first action?',['LANDING GEAR — EXTENDED','SHEDDING — ON','Booster pumps — ON','Gangbar — AFT'],'Then SHEDDING guarded switch OFF, try reset ALT 1/2, engine booster pumps OFF; if impossible ALT/TR OFF… LAND ASAP.','QRH Tab 23'),
+ qm(['ALT1'],'Short-circuit on AC primary bus 1. Action?',['ALT 1 OFF — DO NOT REARM — '+URG.LD,'ALT 1 reset twice','ALT 2 OFF and TR 1 OFF',URG.LI],'Lost: MPAI ENG 1, WDSCR DEICING 1 and 3, heating vent, engine heating mats.','QRH Tab 24'),
+ qm(['ALT2','TR1'],'Short-circuit on AC secondary bus 2. Action?',['ALT 2 OFF, TR 1 OFF — DO NOT REARM — '+URG.LD,'ALT 1 OFF',URG.LA,'Continue without action'],'Lost: MPAI ENG 2, WDSCR DEICING 2, TRU 1.','QRH Tab 24'),
+ qm(['SPLYA'],'SPLY (amber hatched): emergency battery failure. Urgency?',[URG.LD,URG.CF,URG.LA,URG.LI],'Loss of short-circuit monitoring, emergency supply to ISIS, cabin emergency lighting, triple indicator.','QRH Tab 24'),
+ qm([],'DC or AC voltmeter needle in the yellow zone:',['Prepare for possible alternator or TR failure (Tabs 22, 23)','Land immediately','Gangbar AFT','Ignore'],'Abnormal voltage indication.','QRH Tab 25')]},
+{n:'Avionics, AFCS, VMS & misc',d:'Tabs 25–38',c:'#1d4ed8',q:[
+ qm(['MFDF'],'MFD SEVERE FAILURE. Actions?',['Failed MFD OFF, wait 30 s, ON; if it fails again OFF and reconfigure — '+URG.CF,'RCU to BACKUP','Land as soon as possible','Switch off both MFDs'],'QRH Tab 25.','QRH Tab 25'),
+ qm(['RAD'],'Radio altimeter failure: what mode is lost?',['CR.HT','ALT','IAS','HDG'],'RAD ALT OFF then ON. CONTINUE.','QRH Tab 25'),
+ qm(['AHRSR'],'Both AHRS failure: minimum IAS in IMC?',['Vy','30 kt','50 kt','Vtoss'],'Take over, hands-on, RCU to BACKUP (1AHRS2). CONTINUE.','QRH Tab 26'),
+ qm(['FCPR'],'FCP 1 failure. What happens on FND 1?',['Altimeter, course and DH/DA settings revert to power-up settings','Display goes black','Attitude freezes','Nothing'],'RCU: reconfigure to valid FCP.','QRH Tab 26'),
+ qm(['CMFD'],'CHECK MFD. Actions?',['Cross-check with opposite FND/NAVD and ISIS; failed MFD OFF if necessary','RCU to BACKUP','Land immediately','Disengage AP'],'FND/NAVD cross monitoring fault — CONTINUE.','QRH Tab 27'),
+ qm(['CVNE'],'CHECK VNE. What does the red line show?',['It is frozen on the absolute VNE','It disappears','It shows 110 kt','It follows IAS'],'No VNE computation — CONTINUE.','QRH Tab 27'),
+ qm(['XXXX'],'Sensor cross-talk on GLIDE with no crosscheck possible:',['Perform the approach without GLIDE','Continue the ILS normally','Go to RCU BACKUP','Land immediately'],'On LOC with no crosscheck: do not perform an ILS approach.','QRH Tab 27'),
+ qm(['AHRSX'],'Loss of consistency between the AHRS: actions?',['Take over, hands-on, crosscheck with ISIS, determine failed AHRS, RCU to valid AHRS','Switch both AHRS off','Disengage AFCS and land','Ignore'],'Upper modes can be reengaged (displayed amber).','QRH Tab 28'),
+ qm(['LHHMP','APHP'],'Loss of AP hydraulic block. To confirm the failure:',['AP HYD switch on collective OFF then ON; if confirmed, OFF','AUX.P OFF','Emergency gear extension','Pull the cut-out'],'Basic stabilization remains on pitch, roll and yaw with limited authority.','QRH Tab 28'),
+ qm([],'Degraded reliability of displayed AFCS data (strip crossed out):',['References may drift, no further upper mode engagement; monitor engaged references closely','AP disconnects','Land immediately','Switch off the AFCS'],'Once an upper mode is disengaged it cannot be reengaged.','QRH Tab 29'),
+ qm([],'Upper mode degradation on LOC/G/S and any doubt on the ILS:',['Go around','Continue to DH','Engage BACKUP','Hand-fly to minimums'],'CAUTION in Tab 29.','QRH Tab 29'),
+ qm([],'Beep trim failure (axis moving with no pilot action):',['Beep trim opposite for 2 s, or press trim release on the axis for 2 s','Disengage AP','Pull the AFCS breaker','Land immediately'],'Upper modes stay operative at engagement reference.','QRH Tab 30'),
+ qm(['SOEID'],'One EID failure:',['Switch off the failed EID; periodically CHECK THE VEH PAGE','Land immediately','Switch AMC to 2','Continue without action'],'The other EID shows the main page with a caution if a hidden parameter exceeds limits.','QRH Tab 31'),
+ qm([],'Total VMS failure, cruise above 2000 ft, weight > 8350 kg: collective pitch limit?',['16°','16.5°','17°','15.5°'],'Below 8350 kg and OAT < 40 °C: 16.5°. Below 2000 ft: 15.5°.','QRH Tab 31'),
+ qm([],'Total VMS failure, hover/climb above 8000 ft Hσ: collective pitch limit?',['17°','16.5°','16°','15.5°'],'The law steps up with density altitude.','QRH Tab 31'),
+ qm(['ADCX'],'ADC ↔ on FND + CHECK ADC on VMS, inaccurate airspeed on the pilot’s FND:',['RCU: ADC switch set to the side of the valid ADC','Pitot heating OFF','Land immediately','Use ISIS only'],'Total pressure ports of RH or LH pitot head obstructed.','QRH Tab 32'),
+ qm(['ROTBR'],'ROT BR in flight, rotor brake lever and safety lever correctly forward:',[URG.LA,URG.CF,URG.LD,URG.LI],'Accidental application of rotor brake.','QRH Tab 33'),
+ qm(['THROT'],'THROT with fuel flow levers in correct position:',['The warning system is defective','Engine overspeed','Fuel leak','Rotor brake applied'],'QRH Tab 33.','QRH Tab 33'),
+ qm(['DOORS'],'DOORS and/or GPU in flight:',['Reduce airspeed — '+URG.LD,URG.LA,URG.LI,URG.CF],'QRH Tab 34.','QRH Tab 34'),
+ qm(['COWLS'],'COWLS in flight:',[URG.LA,URG.LD,URG.CF,URG.LI],'One or more cowlings open or not properly locked.','QRH Tab 34'),
+ qm(['GRD'],'GRD/FLT in IMC: recommended limits?',['IAS < 120 kt and bank angle < 20°; keep (or activate) upper modes — ISIS remains reliable','IAS < 60 kt','Bank < 30°','No limits'],'Both AHRS may give erroneous attitude and vertical speed.','QRH Tab 34'),
+ qm(['GRD'],'GRD/FLT with the gear extended:',['Do not retract','Retract and re-extend','Use emergency extension immediately','Land immediately'],'If retracted and normal extension indication is incorrect: emergency extension.','QRH Tab 34'),
+ qm(['AWARN'],'A WARN:',['AURAL WARNING switch ON; if not operative do an engine fire line test','Land as soon as possible','Pull fire extinguisher','Ignore'],'No power supply to the aural warning system.','QRH Tab 35'),
+ qm(['ICE'],'ICE illuminates. Actions?',['Fly out of the icing zone ASAP; all anti-icing and deicing systems check ON','Land immediately','Climb to VNE','Switch off deicing'],'The light goes out about 60 s after leaving the icing zone.','QRH Tab 36'),
+ qm(['DEICT'],'DEIC.T°:',['Rotor ice protection systems switch off — '+URG.CF,'Land ASAP','Engage FORCED deicing','Change SYSTEM'],'Systems operating with OAT above 0 °C.','QRH Tab 38'),
+ qm(['DEICE'],'DEICE flashing (failure of the control clock). Action?',['Change SYSTEM to return to normal cycling (affected system keeps working, cycle time × 1.2)','Leave icing immediately','Switch deicing off','Land immediately'],'Flashing can be cancelled with the FAIL OFF pushbutton.','QRH Tab 36')]}
+];
+/* QRH step drills: s = 'ITEM — ACTION' in QRH order */
+const QDRILLS=[
+{id:'q_efg',t:'Engine fire on ground',l:['WARN','F1'],sit:'WARN + aural + FIRE 1 on the ground. Engine fire — immediate actions:',s:['Fuel shutoff valve — CLOSE','Illuminated NORM fire extinguisher — PUSH IN','Fuel flow control levers (both) — SHUTDOWN','Booster pumps — OFF','Heater, air conditioner — OFF','ATC, fire services — ADVISED, REQUESTED','Passenger evacuation advice — CARRY OUT','Parking brake — APPLY','Rotor braking — CARRY OUT'],r:'RFM 3.1 §9.4 / QRH Tab 1'},
+{id:'q_efg2',t:'Engine fire on ground — fire persists',l:['F2'],sit:'FIRE light remains on after the first extinguisher (on the ground):',s:['Illuminated EMER fire extinguisher switch — PUSH IN','Passengers evacuation announcement — CARRY OUT','GENERAL CUT-OUT HANDLE — PULL','Evacuate the aircraft','Fight fire from outside if possible','Emergency checklist — COMPLETE'],r:'QRH Tab 1'},
+{id:'q_eff',t:'Engine fire in flight',l:['WARN','F1'],sit:'Engine fire in flight, safe landing not immediately possible:',s:['Attain single engine flight condition','Fuel shutoff valve — CLOSE','Illuminated NORM fire extinguisher — PUSH IN','Chronometer — START','Fuel flow control lever — SHUTDOWN','Booster pumps — OFF','Fire extinguisher discharged light — CHECK','Heater — OFF'],r:'QRH Tab 1'},
+{id:'q_mgbf',t:'Fire in MGB compartment',l:['WARN','BF1','BF2'],sit:'WARN + aural + B FIRE 1 + B FIRE 2:',s:['Landing gear — DOWN','LAND IMMEDIATELY','Passengers evacuation announcement — CARRY OUT','GENERAL CUT-OUT handle — PULL','Emergency checklist — COMPLETE'],r:'QRH Tab 2'},
+{id:'q_smg',t:'Smoke — ground / hover',l:[],sit:'Smoke in the helicopter on the ground or in hover over a possible landing site:',s:['LAND IMMEDIATELY','EMERGENCY CUT-OFF gangbar — PULL','Fuel flow control levers — SHUTDOWN','All electrical power levers — OFF','Booster pumps — OFF','Open all doors'],r:'RFM 3.1 §10.1 (QRH Tab 3 differs)'},
+{id:'q_smn',t:'Smoke — non-electrical, in flight',l:[],sit:'Smoke of non-electrical origin, immediate landing impossible:',s:['Fly approximately at — Vy','Ventilation system — SWITCH ON','Cockpit ventilation outlets — OPEN','Cockpit sliding windows — CLOSE','LAND AS SOON AS POSSIBLE'],r:'QRH Tab 3'},
+{id:'q_sme',t:'Smoke — electrical, first steps',l:[],sit:'Smoke of electrical origin, in flight:',s:['Fly approximately at — Vy','Cockpit sliding windows — OPEN','Induce a sideslip','EMERG CUT-OFF: ALT.1, ALT.2, BAT — AFT','EMERG.BAT — SPLY','ALT.1, ALT.2, TR.1, TR.2 switches — OFF','COUPLING switch — OFF'],r:'RFM 3.1 §10.2.2 (QRH Tab 3 differs)'},
+{id:'q_ogeh',t:'Engine failure in hover OGE',l:['WARN','DIFF','EP1','PWR2'],sit:'Single engine failure in hover out of ground effect — landing:',s:['Control NR','Increase airspeed to 30–40 kt, nose-down 15–20° max','Approaching the ground: level off and reduce forward airspeed','As it sinks: control attitude and cushion touchdown'],r:'QRH Tab 4'},
+{id:'q_tor',t:'Engine failure on take-off < 45 kt',l:['WARN','DIFF','EP2','PWR1'],sit:'Engine failure during take-off, airspeed below 45 kt (before V1):',s:['Reject: rotate nose up before V1','Maintain NR with collective','Apply collective to cushion ground contact','Neutralize cyclic, collective to minimum','Apply brakes to stop within available distance'],r:'QRH Tab 4'},
+{id:'q_stab',t:'Engine failure in stabilized flight — landing',l:['WARN','DIFF','EP1','PWR2'],sit:'Engine failure in stabilized flight, decision to land:',s:['Control NR','Adopt configuration compatible with available power','Heating system — OFF','Follow the recommended approach path','Landing gear — DOWN','Nose wheel — LOCKED','Parking brake — RELEASED','Failed engine booster pump — OFF','Failed engine fuel flow control lever — OFF'],r:'QRH Tab 5'},
+{id:'q_appr',t:'Engine failure during approach — landing',l:['WARN','DIFF','EP2','PWR1'],sit:'Engine failure during approach, landing:',s:['Control NR','Heating system — OFF','Failed engine booster pump — OFF','Landing gear — DOWN','Nose wheel — LOCKED','Parking brake — RELEASED','Control airspeed around 40 kt','Reduce forward airspeed approaching the ground','Control attitude and cushion touchdown'],r:'QRH Tab 5'},
+{id:'q_ises',t:'Intentional single engine shutdown',l:[],sit:'Intentional single engine shutdown after malfunction:',s:['Collective pitch — REDUCE to about 14°','Heating system — OFF','Fuel flow control lever: fast reduction gate — SET','Control NR','Booster pumps — OFF','Fuel flow control lever — OFF'],r:'QRH Tab 5'},
+{id:'q_rst',t:'In-flight engine restart',l:[],sit:'In-flight engine restart (not after governing sensor failure):',s:['Airspeed — REDUCE to approximately Vy','Booster pumps — ON','Fuel pressure — CHECK','Fuel flow control lever — START DETENT','Start pushbutton — DEPRESS','Fuel flow control lever — FORWARD (TOT ≤ 750 °C)'],r:'QRH Tab 6'},
+{id:'q_auto',t:'Autorotation landing over land',l:[],sit:'Autorotation landing over land:',s:['Collective — REDUCE, NR ≤ 109 % (290 rpm)','Gear down, nose wheel locked, parking brake released, horizons zero set','Final: into wind at Vy + 10 kt','Begin flare (≈130 ft max weight / 70 ft light)','Adopt ≈15–20° nose-up, collective slightly up if needed','Near ground: nose-up below 10°, collective up to cushion','After touchdown: collective minimum, wheel brakes below 30 kt'],r:'QRH Tab 6'},
+{id:'q_gov',t:'Major governing system failure',l:['DIFF','PWR1','EP1','OVSP'],sit:'Major governing failure (N1 stuck at 85 % or running up / oscillating):',s:['Rotor speed — MAINTAIN 94–101 %','Identify engine: collective variation until PWR1/PWR2','Adjust affected engine with fuel flow control lever','Descent: affected lever to fast reduction gate','Final: lever forward until its torque shows 20 %','After landing at 10° collective: shut down affected engine'],r:'QRH Tab 8'},
+{id:'q_ast',t:'Automatic starting device failure',l:[],sit:'Automatic starting device failure (overheating during start):',s:['Close starting servo-valve supply valve (knob to F)','Hold START while advancing the fuel flow lever','Above 500 °C TOT: lever AFT slightly, keep TOT below 750 °C','At N1 40–45 %: release START','Lever FORWARD until N1 ≈ 65 %, complete start normally'],r:'QRH Tab 11'},
+{id:'q_trc',t:'Tail rotor control failure in cruise',l:[],sit:'Uncommanded yaw and stabilized sideslip in cruise — tail rotor control failure:',s:['Reduce collective to ≈13°, heading with lateral cyclic','Continue level flight to a running-landing site','Prepare the aircraft for landing','Approach 50–60 kt IAS, 9–11° collective, ≈500 ft/min, slight left sideslip','Near the ground: slowly reduce speed, increase collective to align','Touch down as soon as aligned','After touchdown: cut-out handle if appropriate, differential wheel brakes'],r:'QRH Tab 15'},
+{id:'q_lhlev',t:'LH reservoir low level',l:['LHLEV','APHP','SERVO'],sit:'LH.LEV + AP.HP + SERVO:',s:['AP HYD switch (collective) — OFF','EMERGENCY LANDING GEAR EXTENSION','LAND AS SOON AS POSSIBLE','Before landing: ancillary accumulator ≥ 120 bar','After landing: monitor accumulator pressure'],r:'QRH Tab 17'},
+{id:'q_elg',t:'Emergency landing gear extension',l:[],sit:'Emergency landing gear extension procedure:',s:['Emergency L/G extension handle — PULL','PUMP light — ON','L/G control selector — DOWN','Wait for extension (≈2 min)','3 green lights — ON','Emergency handle — DOWN position','PUMP light — OFF'],r:'QRH Tab 19'},
+{id:'q_gup',t:'Landing with gear up',l:[],sit:'Landing gear cannot be extended. Over a level site at minimum safe fuel, in hover:',s:['Parking brake — APPLIED','Side doors (except stairway) — OPENED','Passengers — EVACUATE','Ease onto the ground, slowly reduce collective','Collective — MINIMUM','General cut-out handle — PULL','Rotor brake — CAREFULLY APPLY','Leave when the rotor has fully stopped'],r:'QRH Tab 19'},
+{id:'q_essdc',t:'Essential bus DC short-circuit',l:['TR2','BATL','IBAR','SPLYA','SHED'],sit:'TR.2 + BAT + INTER-BAR + SPLY + SHEDDING:',s:['BAT switch of EMERG CUT-OFF bar — AFT','TR.2 switch — OFF','COUPLING switch — OFF','Keep BATT.EXT.PWR — ON','EMERGENCY LANDING GEAR EXTENSION','LAND AS SOON AS POSSIBLE'],r:'QRH Tab 21'},
+{id:'q_2alt',t:'Failure of both alternators',l:['DCF','ALT1','ALT2','TR1','TR2','IBAR'],sit:'DC FAIL + ALT.1 + ALT.2 + TR.1 + TR.2 + INTER-BAR:',s:['LANDING GEAR — EXTENDED','SHEDDING guarded switch — OFF','ALT 1 and ALT 2 switches — TRY TO RESET','Engine 1 and 2 booster pumps — OFF','If no reset: ALT 1, TR 1, ALT 2, TR 2 — OFF','Reduce electrical consumption','Monitor battery voltage','LAND AS SOON AS POSSIBLE'],r:'QRH Tab 23'},
+{id:'q_batt',t:'Main battery overheating',l:['BATT'],sit:'BAT T° illuminates:',s:['Check indicator reading to confirm','EMERG BATT switch — FORCED','BATT.EXT.PWR switch — OFF','BAT T° out: LIMIT DURATION; still on: LAND ASAP'],r:'QRH Tab 20'}
+];
+/* ===== Flight Manual AS 532 AL (ALe, UZB customization) — Volume 1, Sections 2 & 4 + APP.2.5 UZB ===== */
+const FUNITS=[
+{n:'General limitations & envelope',d:'RFM 2.1, 2.3',c:'#c2410c',q:[
+ qm([],'Which of these does RFM 2.1 prohibit?',['Intentional full autorotation landings','Running landings on hard ground','Vertical takeoff','Landing on sloping ground within limits'],'Also prohibited: acrobatic flying, extended rearward flight, intentional running landings on soft ground, penetration of CBs.','RFM 2.1 §4'),
+ qt([],'Downwind flight is permitted with the bleed valve in the NORMAL position.',false,'Prohibited: downwind flight with the bleed valve in the NORMAL position.','RFM 2.1 §4'),
+ qm([],'P2 air bleed on takeoff and landing:',['Any P2 air bleed is prohibited','Allowed for heating only','Allowed below 0 °C OAT','Allowed with one engine'],'Outside takeoff/landing, P2 bleed is allowed only for heating and demisting.','RFM 2.1 §4; 2.5 §2.3.2'),
+ qm([],'When may the 2 min 30 s and intermediate contingency ratings be used?',['Only for real engine failures or maintenance test flights','For any training flight','For heavy takeoffs','Never'],'Single-engine ratings must not be used for training purposes.','RFM 2.1 §4; 2.5 §2.3.1'),
+ qm([],'CRHT mode restrictions:',['Not with standard ground speed mode at IAS < 30 kt, and not in IMC above land','Only above 1000 ft','Only over land','No restrictions'],'Both are listed in 2.1 §4 restrictions.','RFM 2.1 §4'),
+ qm([],'Minimum flight crew:',['VFR 1 pilot, IFR 2 pilots','VFR 2, IFR 2','VFR 1, IFR 1 with AP','VFR 1, IFR 3'],'RFM 2.1 §5.','RFM 2.1 §5'),
+ qm([],'Maximum number of persons transported (including crew):',['27','24','29','31'],'Depends on the seat installation.','RFM 2.1 §6'),
+ qm([],'Heavy sleet or snow conditions are considered to exist when horizontal visibility is below:',['400 m','800 m','1500 m','200 m'],'Local icing can occur in humid conditions with an indicated OAT of +3 °C.','RFM 2.1 §4, note'),
+ qm([],'Maximum pressure altitude for takeoff and landing:',['16,700 ft (5100 m)','25,000 ft','13,000 ft','10,000 ft'],'In flight: 25,000 ft (7600 m). With 8 cSt mineral oil in transmission (except MRH): 10,000 ft.','RFM 2.3 §1'),
+ qm([],'Temperature limits:',['Max ISA +35 °C limited to +50 °C; min −30 °C in normal operation','Max +45 °C; min −40 °C','Max ISA +20 °C; min −20 °C','Max +50 °C; min −45 °C'],'RFM 2.3 §2.','RFM 2.3 §2'),
+ qm([],'Bank angle limits:',['40° above 7800 kg; 30° above 8350 kg','45° above 7800 kg; 35° above 8350 kg','30° at all weights','60° up to 8350 kg'],'At high altitude 4.8 also recommends restricting bank to 30°.','RFM 2.3 §5'),
+ qm([],'Absolute VNE power-off:',['145 kt','150 kt','167 kt','130 kt'],'Power-on: 167 kt up to 8350 kg, 150 kt above.','RFM 2.3 §4')]},
+{n:'Weight, airspeeds, IFR, rotor brake',d:'RFM 2.2–2.4',c:'#b45309',q:[
+ qm([],'Weight limits:',['Minimum 4500 kg; maximum takeoff/landing with internal load 9000 kg','Minimum 5000 kg; maximum 9500 kg','Minimum 4000 kg; maximum 8600 kg','Minimum 4500 kg; maximum 8350 kg'],'Max weight also limited to the twin-engine hover IGE weight for the density altitude.','RFM 2.2 §1'),
+ qm([],'Longitudinal CG datum:',['4.67 m forward of the main rotor centerline','The main rotor centerline','The nose of the aircraft','2.5 m aft of the main rotor'],'Lateral limits: LH 0.08 m, RH 0.09 m.','RFM 2.2 §2–3'),
+ qm([],'Sliding doors: maximum speed with doors open / while operating the doors:',['150 kt / 70 kt','150 kt / 55 kt','110 kt / 70 kt','120 kt / 60 kt'],'Plug doors: 150 kt / 55 kt.','RFM 2.3 §4'),
+ qm([],'Maximum airspeed while operating the landing light:',['110 kt','90 kt','130 kt','150 kt'],'RFM 2.3 §4.','RFM 2.3 §4'),
+ qm([],'Taxiing limitations:',['Max taxi ground speed 40 kt; max braking ground speed 30 kt','30 kt / 20 kt','50 kt / 40 kt','40 kt / 40 kt'],'RFM 2.3 §6.','RFM 2.3 §6'),
+ qm([],'IFR limitation with the basic AP:',['IAS ≥ 50 kt','IAS ≥ 30 kt','IAS ≥ 80 kt','No limit'],'With IAS upper mode engaged: IAS ≥ 30 kt. Both APM failed: 80–120 kt, leave IMC ASAP.','RFM 2.3 §7'),
+ qm([],'G/S mode limit and ILS minimum decision height:',['6.5° and 185 ft','4° and 200 ft','6.5° and 100 ft','3° and 185 ft'],'CAUTION in 2.3 §7.','RFM 2.3 §7'),
+ qt([],'More than one engine may be started with the rotor brake tightened if wind is below 30 kt.',false,'It is forbidden to start more than one engine with the rotor brake tightened.','RFM 2.4 §1.1'),
+ qm([],'First engine start with rotor brake released is forbidden with wind stronger than:',['30 kt','20 kt','45 kt','55 kt'],'Strong-wind procedure: RFM 4.8 §2.','RFM 2.4 §1.1'),
+ qm([],'Rotor brake (POST SB 63-22 or POST MOD 07-26424): released before the first engine N1 exceeds:',['70 % (23,250 rpm)','45 % (15,000 rpm)','63 %','85 %'],'PRE SB 63-22: 45 % (15,000 rpm). Never run an engine more than 5 min with rotor brake applied.','RFM 2.4 §1.1'),
+ qm([],'Maximum NR for rotor brake application:',['45 % (120 rpm)','30 %','60 %','25 %'],'Both engines must be shut down before applying the rotor brake.','RFM 2.4 §1.2'),
+ qm([],'Minimum interval between the 2nd and 3rd rotor brake applications:',['15 min, including at least 10 min of rotation','5 min','10 min','30 min'],'Between 1st and 2nd: 5 min.','RFM 2.4 §1.2')]},
+{n:'Engine & rotor limits',d:'RFM 2.5 §1–2',c:'#be123c',q:[
+ qm([],'Engine start may be attempted with battery at ambient temperature for OAT above:',['−15 °C','−30 °C','0 °C','−20 °C'],'Warm battery (0 °C or more): OAT above −30 °C. GPU: no restriction.','RFM 2.5 §1.1'),
+ qm([],'In-flight relighting above 13,000 ft is guaranteed only if:',['The engine is hot','The aircraft is below Vy','The battery is warm','Both booster pumps are ON'],'Relighting may be attempted throughout the flight envelope.','RFM 2.5 §1.1'),
+ qm([],'Collective pitch limits:',['Level flight 16.5° (< 8350 kg) / 16° (> 8350 kg); climb 17.5° (spring stop); travel stop 19°','Level 17°; climb 18°','Level 15.5°; climb 16.5°','Level 16°; climb 19°'],'Climbing limitation can be used until Vy.','RFM 2.5 §2.1'),
+ qm([],'MGB torque, AEO:',['TOP 100 % (5 min); MCP 81 % (unlimited)','TOP 110 %; MCP 100 %','TOP 100 %; MCP 90 %','TOP 95 %; MCP 81 %'],'100 % torque = 2235 kW at 100 % NR (265 rpm).','RFM 2.5 §2.2'),
+ qm([],'MGB torque, OEI:',['Max contingency 69 % (2 min 30 s); intermediate 66 % (unlimited); transient 74 % (20 s)','81 % / 69 % / 100 %','74 % / 66 % / 81 %','69 % / 60 % / 74 %'],'MGB TOP limitation can be used until Vy.','RFM 2.5 §2.2'),
+ qm([],'N1 at MCP and maximum transient power (MTP):',['97.3 % unlimited; 105 % for 20 s','100 %; 102.4 %','95 %; 105 %','97.3 %; 102.4 % for 20 s'],'TOP: 100.45 % (OAT < 15 °C) or 100 % (OAT > 15 °C), 5 min.','RFM 2.5 §2.3.1'),
+ qm([],'OEI maximum contingency N1 (2 min 30 s):',['102.4 % (34,000 rpm), absolute maximum','105 %','101.3 %','100 %'],'It varies with fuel temperature; mean value 101.3 % at zero Hp and 15 °C.','RFM 2.5 §2.3.1'),
+ qm([],'TOT limits AEO / OEI:',['TOP 795 °C, MCP 735 °C / max contingency 830 °C, intermediate 785 °C','800 / 750 / 850 / 800','795 / 750 / 830 / 795','780 / 735 / 810 / 785'],'Starting: unlimited 750 °C; transient 5–25 s 780 °C (Hp < 20,000 ft).','RFM 2.5 §2.4'),
+ qm([],'Engine starting TOT, Hp < 20,000 ft: maximum transient for up to 5 s and absolute maximum (2 s):',['800 °C and 810 °C','780 °C and 800 °C','820 °C and 850 °C','750 °C and 780 °C'],'Above 20,000 ft: 820 °C and 850 °C. Record maximum TOT and duration in the engine log book.','RFM 2.5 §2.4'),
+ qm([],'Power-on rotor speed:',['Nominal 100 % (265 rpm); regulation range 92.5–103.8 %; minimum transient 83 %','Nominal 100 %; range 95–105 %','Nominal 265 rpm; range 90–110 %','Nominal 270 rpm; range 92.5–100 %'],'RFM 2.5 §2.5.','RFM 2.5 §2.5'),
+ qm([],'Power-off rotor speed limits:',['Max continuous 109.5 % (290 rpm); max transient 117 % (310 rpm) 20 s; min 83 % below 100 kt, 92.5 % above 100 kt','Max 103.8 %; min 92.5 %','Max 120 %; min 75 %','Max 109.5 %; min 83 % at all speeds'],'Aural warning thresholds: 109.5 % and 92.5 %.','RFM 2.5 §2.5'),
+ qm([],'Engine overspeed shutdown occurs at:',['120 % equivalent NR (318 rpm)','117 %','110 %','125 %'],'100 rotor % (265 rpm) corresponds to 22,850 free turbine rpm.','RFM 2.5 §2.6')]},
+{n:'Systems, fluids & miscellaneous',d:'RFM 2.5 §3, 2.6, 2.7',c:'#7c3aed',q:[
+ qm([],'Fuel pressure normal range:',['0.30 – 1.33 bar','1.7 – 6 bar','0.1 – 0.5 bar','2 – 4.5 bar'],'RFM 2.5 §3.1.','RFM 2.5 §3.1'),
+ qm([],'Engine oil: pressure range and maximum temperature:',['1.7 – 6 bar; 120 °C','3.5 – 8 bar; 145 °C','1 – 5 bar; 110 °C','2 – 6 bar; 130 °C'],'Do not apply power if engine oil pressure exceeds 6 bar.','RFM 2.5 §3.2'),
+ qm([],'Oil temperature −20 °C with 5 cSt oil: waiting time at flight idle before applying power:',['2 min 30 s','1 min','4 min','1 min 30 s'],'5 cSt: 0 °C 1 min, −10 °C 1 min 30 s, −20 °C 2 min 30 s, −30 °C 4 min.','RFM 2.5 §3.2'),
+ qm([],'MGB: main and emergency system pressure, max temperature:',['Main 3.5–8 bar; emergency 2–4.5 bar; 145 °C','Main 1.7–6; emergency 1–3; 120 °C','Main 2–4.5; emergency 3.5–8; 145 °C','Main 3–7; emergency 2–4; 150 °C'],'MGB P warning light: below 0.4 bar (Post MOD 07-52453).','RFM 2.5 §3.3.1'),
+ qm([],'IGB and TGB maximum temperature:',['120 °C','145 °C','100 °C','130 °C'],'RFM 2.5 §3.3.2.','RFM 2.5 §3.3.2'),
+ qm([],'Main hydraulic system pressures:',['Min 80, nominal 150–195, max 210 bar','Min 80, nominal 100–145, max 190 bar','Min 100, nominal 150–210, max 230 bar','Min 60, nominal 120–160, max 200 bar'],'Auxiliary: min 80, nominal 100–145, max 190 bar.','RFM 2.5 §3.4'),
+ qm([],'Electrical limits AC / DC:',['AC 98–132 V, 75 A; DC 14–32 V, 150 A','AC 100–120 V; DC 24–28 V','AC 98–132 V, 150 A; DC 14–32 V, 75 A','AC 115 V ± 5; DC 22–30 V'],'RFM 2.5 §3.5.','RFM 2.5 §3.5'),
+ qm([],'Anti-icing fuel additive concentration:',['0.10 % to 0.15 % per volume (Fluid "I": 0.10–0.30 %)','0.05 % to 0.10 %','0.15 % to 0.30 %','1 % to 2 %'],'Without ICE TRAP: required when OAT in flight expected below 0 °C; with ICE TRAP: below −20 °C.','RFM 2.6 §2'),
+ qt([],'Kerosene TS-1 (GOST 10227) is an authorized fuel.',true,'It is listed in the authorized fuels table (no anti-icing additive included).','RFM 2.6 §1'),
+ qm([],'Engine air intake anti-icing: maximum OAT for continuous operation:',['+10 °C','+5 °C','+3 °C','0 °C'],'Must be ON when OAT < +5 °C with visible humidity (grid-type intakes).','RFM 2.7 §2; 4.8 §7'),
+ qm([],'Landing strip slope, rotor stopped, no wind:',['Nose up 12°, nose down 8°, lateral 8°','12° in all directions','Nose up 10°, nose down 10°, lateral 6°','Nose up 8°, nose down 12°, lateral 8°'],'Rotor spinning: 12° in all directions, or any slope bringing the cyclic to a stop.','RFM 2.7 §3'),
+ qt([],'Windshield wipers may be used on a dry windshield for a short check.',false,'Never operate the wipers when the windshield is dry.','RFM 2.7 §1')]},
+{n:'Engine starting',d:'RFM 4.3',c:'#15803d',q:[
+ qm([],'Battery voltage required before starting (on battery or GPU):',['> 25 V','> 22 V','> 28 V','> 20 V'],'EMERG.BAT STBY, AURAL WARNING ON, EMERGENCY CUT OFF forward, SHEDDING ON, BATT.EXT.PWR ON.','RFM 4.3 §1.1'),
+ qm([],'EMERG.BAT switch position for starting:',['STBY (snap wired)','FORCED','SPLY','OFF'],'RFM 4.3 §1.1.','RFM 4.3 §1.1'),
+ qm(['FIRED'],'Before starting, FIRE DET flashes. Action?',['Carry out MGB and ENGINE FIRE tests and note which test causes FIRE DET for post-flight maintenance','Abort the flight','Pull the cut-out handle','Ignore'],'RFM 4.3 §1.1 note.','RFM 4.3 §1.1'),
+ qm([],'Cranking:',['Fuel flow lever OFF, crank switch ON for 15 s max; not with fuel shut-off closed, not within 30 s after shutdown','30 s max','With fuel flow lever in start detent','At any time'],'Max 3 consecutive start/crank attempts, then wait 20 min.','RFM 4.3 §2.1.3'),
+ qm([],'First engine start: the rotor must start spinning before N1 reaches:',['17 %','23 %','45 %','10 %'],'CAUTION: immediately shut down if the rotor does not start rotating.','RFM 4.3 §2.2'),
+ qm([],'During start: OVSPD light goes off at… and the starter cuts off at…',['NR/N2 23 %; N1 45 %','N1 23 %; N1 45 %','NR 45 %; N1 65 %','N2 15 %; N1 40 %'],'ENG P light goes off when oil pressure reaches 1.7 bar.','RFM 4.3 §2.2'),
+ qm([],'Engine start: maximum TOT during acceleration (fuel flow lever forward):',['750 °C','795 °C','700 °C','830 °C'],'NR audio warning check: 75 ≤ NR ≤ 92.5 %.','RFM 4.3 §2.2'),
+ qm([],'Alternators coupling during a GPU (28 V DC) start occurs at about:',['NR ≈ 90 %','NR ≈ 75 %','N1 ≈ 45 %','NR ≈ 100 %'],'Then overhead panel lights all OFF, electrical systems check, aux hydraulic pump ON, PITOTS ON.','RFM 4.3 §2.2'),
+ qm([],'Hot engine starting procedure applies when:',['OAT > 30 °C and residual TOT > 100 °C','Residual TOT > 150 °C','OAT > 40 °C','After any failed start'],'Booster pumps ON (wait ≥ 20 s), lever closed, START held 15 s, lever to start detent, release START.','RFM 4.3 §2.4'),
+ qm([],'Second engine start — what must be shut down immediately?',['The engine, in case of freewheel slippage during synchronization','The first engine','The rotor brake','The APM'],'Freewheel check: N1 and torque drop on the 1st engine, rise on the 2nd.','RFM 4.3 §2.3'),
+ qm([],'P2 check: correct result?',['Hot air at the outlets and TOT of the engine at flight power rises ≈ 20°','TOT drops 20°','NR rises','No change'],'No air flow = P2 bleed fault; no TOT rise = dual check valve fault (engine side at idle).','RFM 4.3 §3'),
+ qm([],'AFCS preflight test (P.FLT TEST): what must the pilot avoid?',['Moving or touching the controls or the AFCAU during the test','Pressing P.FLT TEST twice','Having APM OFF','Having the collective at low pitch'],'Expected advisories: AP1 TEST OK and AP2 TEST OK.','RFM 4.3 §3')]},
+{n:'Taxi, takeoff, climb, cruise',d:'RFM 4.4–4.5',c:'#0f766e',q:[
+ qm([],'Taxiing: collective pitch setting:',['Increase as necessary between 9° and 10°','3° to 5°','12° to 14°','Full low pitch'],'Spot turns at high weight: raise collective first to ease weight off the nose gear.','RFM 4.4 §1'),
+ qm([],'Limit cyclic movement from neutral while taxiing to:',['20 %, especially at minimum collective','50 %','10 %','No limit'],'Prevents blades striking the droop restrainers.','RFM 4.4 §1'),
+ qm([],'On the ground, sudden vertical collective oscillations are prevented by:',['Depressing the collective trim release trigger whenever the collective is moved','Switching AP off','Keeping the parking brake on','Increasing NR'],'Lateral roll oscillations: push cyclic slightly or take off.','RFM 4.4 caution'),
+ qm([],'Checks prior to takeoff: air intake anti-icing:',['ON if OAT < 5 °C with visible humidity','Always ON','ON below 0 °C only','OFF'],'Also: heating and demisting OFF, nose wheels locked, fuel transfer OFF, bleed valves offset.','RFM 4.4 §2.1'),
+ qm([],'Procedure N°1 normal takeoff: hover height and max nose-down attitude:',['8 ft (2.5 m); 5° nose-down','15 ft; 10°','3 ft; 5°','30 ft; 15°'],'At IAS = Vy − 10 kt reduce nose-down attitude and stabilize at Vy.','RFM 4.4 §2.3.1'),
+ qm([],'Procedure N°2 short takeoff target:',['Hover 15 ft, 40 kt at 100 ft','Hover 8 ft, Vy at 50 ft','Hover 30 ft, 60 kt at 200 ft','Hover 15 ft, Vtoss at 35 ft'],'At 100 ft select the required IAS–R/C combination.','RFM 4.4 §2.3.2'),
+ qm([],'Procedure N°3 vertical takeoff is performed from:',['The rear edge of the airfield, hover 15 ft (4.5 m)','The front edge, hover 8 ft','Anywhere','A runway with roll'],'Allowed when there is no avoid area (top point height < 100 ft).','RFM 4.4 §2.3.3'),
+ qm([],'Climb: power must not exceed:',['17.5° collective, maximum torque or maximum N1','16° collective','MCP only','TOP for 10 min'],'Recommended climbing speed Vy; bleed valves to normal threshold.','RFM 4.4 §3'),
+ qm(['LG'],'Landing gear retracted below 60 kt:',['L/G will flash','Gear will not retract','CAUT illuminates','Nothing'],'If wheel brakes were used heavily, leave the gear down at least 5 min.','RFM 4.4 §3'),
+ qm([],'Cruise collective pitch: normal / fast (< 8350 kg) / max range:',['15.5° / 16.5° / 14–15.5°','16° / 17° / 15°','14° / 16° / 13°','15.5° / 17.5° / 14°'],'Fast cruise above 8350 kg: 16°.','RFM 4.5 §1'),
+ qm([],'Descent checks:',['NR less than 109.5 % and airspeed less than VNE, especially at high rates of descent','Oil pressure only','TOT only','Heating ON'],'Minimum rate of descent for a given pitch is obtained at Vy.','RFM 4.5 §2'),
+ qm([],'Recommended flight parameters in severe turbulence:',['Minimum Vy, maximum 135 kt TAS','Minimum 60 kt, maximum VNE','Minimum 40 kt, maximum 110 kt','Vy only'],'RFM 4.8 §4.','RFM 4.8 §4')]},
+{n:'Landing & shutdown',d:'RFM 4.6–4.7',c:'#1d4ed8',q:[
+ qm([],'Checks prior to landing: recommended speed for gear extension:',['IAS ≤ 110 kt','IAS ≤ 150 kt','IAS ≤ 60 kt','No limit'],'Heating OFF, ordinance lights ON, fuel transfer OFF, bleed valves offset, WCP all lights OFF.','RFM 4.6 §1'),
+ qm([],'Normal landing at 80 ft over the landing area:',['Gradually reduce IAS to 40 kt and rate of descent to 300 ft/min','Reduce to 20 kt and 100 ft/min','Hold Vy','Reduce to 60 kt and 500 ft/min'],'From 15 ft (4.5 m) increase collective to cancel speed and descent; touch down vertically.','RFM 4.6 §3.1'),
+ qm([],'Near ground level the nose-up attitude must not exceed:',['10°','15°','5°','20°'],'To prevent the tail rotor guard from striking the ground.','RFM 4.6 caution'),
+ qm([],'Landing above hover OGE weight: zero airspeed should be reached at:',['10 ft over the touchdown point','50 ft','At touchdown','100 ft'],'At 100 ft very gradually reduce IAS to 40 kt, R/D 300 ft/min; calm wind passes ≈60 ft at 30 kt.','RFM 4.6 §3.1.1'),
+ qm([],'Running landing: when are wheel brakes applied?',['Not until the collective lever is fully at the low-pitch stop','At 30 kt','At touchdown','Before touchdown'],'At about 30 kt reduce nose-up attitude and collective.','RFM 4.6 §3.2'),
+ qm([],'Landing on sloping ground: parking brake and nose wheels:',['Parking brake applied, nose wheels locked','Released / unlocked','Released / locked','Applied / unlocked'],'If attitude or cyclic reaches a limit — abort the landing.','RFM 4.6 §3.3'),
+ qt([],'Facing up the slope the aircraft may roll backward as pitch is reduced, because there is no braking on the nose wheels.',true,'CAUTION 3 in 4.6 §3.3.','RFM 4.6 §3.3'),
+ qm([],'Except in an emergency, engines must not be shut down with:',['The fuel shutoff valve controls','The fuel flow control levers','The rotor brake','The crank switch'],'RFM 4.7 caution.','RFM 4.7'),
+ qm([],'Engine stabilization at full low pitch before shutdown (normal procedure):',['1 min if OAT above −10 °C; 2 min if below −10 °C','2 min / 3 min','30 s / 1 min','5 min always'],'High-wind shutdown: 2 min / 3 min.','RFM 4.7; 4.8 §2.3'),
+ qm([],'Shutdown sequence after stabilization:',['Fuel flow levers fast reduction → booster pumps OFF → fuel flow levers OFF → RB safety lever aft → rotor brake at NR ≤ 45 %','Booster pumps OFF → fuel shutoff valves → rotor brake','Rotor brake → fuel flow levers OFF','Battery OFF → fuel flow levers OFF'],'After rotor stop: ordinance lights OFF, aux hydraulic pump OFF, battery OFF, overhead switches all OFF, accumulator check, gear pin in place.','RFM 4.7'),
+ qt([],'Engine shutdown is permitted even with GRD/FLT on the warning panel.',true,'RFM 4.7 note 2 (Post-MOD 07 23817).','RFM 4.7'),
+ qm([],'Cold weather start: MGB P illuminates. Action?',['Switch off the engine immediately and heat the oil cooler','Continue the start','Increase power','Wait 5 min'],'Engine oil pressure may exceed 6 bar; MGB C may stay on temporarily; 5 min ground run at flight idle.','RFM 4.8 §3')]},
+{n:'Fuel, AFCS & special ops',d:'RFM 4.8, 4.10',c:'#0e7490',q:[
+ qm([],'Total fuel capacity, basic version without the 6th tank:',['2043 L (1613 kg)','2367 L','1800 L','2500 L'],'With 6th tank: 2367 L (1869 kg). LH group 915 L.','RFM 4.10 §1.1'),
+ qm([],'Fuel transfer is permitted:',['At any time except during takeoff and landing','Only in cruise above 1000 ft','Only on the ground','Never with one engine'],'Interrupt if the receiving group High Level light or the source group Low Level light illuminates.','RFM 4.10 §1.3.1'),
+ qm([],'Recommended start of fuel transfer:',['After consuming ≈150 L from both groups (≈½ h at best-range speed)','Immediately after takeoff','At 50 % fuel','Only when LOW LEVEL lights'],'Resume transfer if the source feeder tank holds more than 90 L.','RFM 4.10 §1.3.2'),
+ qm([],'Untransferable fuel WITHOUT booster pumps:',['LH 90 L, RH 190 L','LH 50 L, RH 10 L','LH 45 L, RH 132 L','LH 16 L, RH 9 L'],'With booster pumps: LH 50 L, RH 10 L.','RFM 4.10 §1.3.3'),
+ qm([],'Below what height must the helicopter be flown hands on the controls (AFCS)?',['200 ft AGL','500 ft','100 ft','50 ft'],'RFM 4.10 §2.1.','RFM 4.10 §2.1'),
+ qm([],'AFCS IAS mode is available above:',['30 kt','26 kt','35 kt','50 kt'],'HDG > 26 kt; A.NAV, VOR, LOC, G/S > 35 kt.','RFM 4.10 §2.2'),
+ qm([],'G/S mode minimum usage height and automatic switch to ALT:',['185 ft; at ≈120 ft switches to ALT and stabilizes at 80 ft','200 ft; at 100 ft','185 ft; at 50 ft','300 ft; at 150 ft'],'In G/S at minimum usage height disengage NR ILS if engaged.','RFM 4.10 §2.2'),
+ qm([],'NR ILS function:',['Must be selected for all ILS approaches to avoid oscillations','Only in IMC','Only for coupled approaches','Never in VMC'],'RFM 4.10 §3.','RFM 4.10 §3'),
+ qm([],'Strong-wind start (PRE SB 63-22): rotor brake released when N1 ≥:',['45 % (15,000 rpm)','70 %','63 %','23 %'],'If the rotor turns before 45 % N1, release brake and accelerate after ROT BR goes out.','RFM 4.8 §2.2'),
+ qm([],'Operation at high altitude — recommendations:',['Avoid sudden collective variations; restrict bank to 30°','Reduce NR to 95 %','Use OEI ratings','Fly below Vy'],'RFM 4.8 §5.','RFM 4.8 §5'),
+ qm([],'In-flight engine power check: collective and stabilization time:',['MCP with 16° (or 16.5°) collective; ≥3 min stable (5 min recommended), P2 bleed OFF','TOP for 1 min','12° for 10 min','MCP for 30 s'],'Performed after at least 20 min of flight; bleed valves closed.','RFM 4.9 §1'),
+ qm([],'Battery storage in a warm place is mandatory below:',['−15 °C','−10 °C','−30 °C','0 °C'],'Recommended below −10 °C.','RFM 4.8 §3.1')]},
+{n:'UZB appendix & RFM vs QRH',d:'APP.2.5 UZB, RFM 3',c:'#a21caf',q:[
+ qm([],'UZB aircraft: emergency exits per APP.2.5:',['Side windows, pilot and co-pilot doors, cargo loading door with jettisonable window','Sliding doors and stairway door','Tail hatch only','Pilot doors only'],'APP.2.5 supersedes RFM 3.1 §4 for UZB aircraft.','APP.2.5 UZB, 3.1'),
+ qm([],'UZB, failure of both alternators or both TRs: what must NOT be used?',['The auxiliary hydraulic pump for the landing gear, and the public address','The emergency battery','The VHF at all','The landing light at all'],'Limits: side wiper 2 min, landing light 3 min (5 min S/N 3071, 3076, 3104, 3108, 3111), V/UHF ARC 210 5 min.','APP.2.5 UZB, 3.8 §8–9'),
+ qm([],'UZB, both alternators failed: remaining flying time on battery (with shedding within 1 min) for S/N 3104, 3108, 3111:',['≥ 29 min 45 s','≥ 30 min 17 s','≥ 28 min 52 s','≥ 35 min'],'2970–3024: 28 min 52 s; 3033/3034/3037: 29 min 02 s; 3071/3076: 30 min 17 s.','APP.2.5 UZB, 3.8 §8'),
+ qm([],'UZB, failure of one TR (S/N 3104, 3108, 3111) during takeoff/landing:',['CABIN LIGHTING OFF, then try to reset the TR (else OFF) — CONTINUE THE FLIGHT','SHEDDING ON','Land immediately','Gangbar AFT'],'S/N 2970–3037 with armament: SHEDDING guarded switch OFF only during T/O and landing.','APP.2.5 UZB, 3.8 §6'),
+ qm([],'UZB, main battery failure: additional circuits lost:',['Utility LT and V/UHF ARC 210 Pilot','Both TRs','Fire detection','ISIS'],'Supplements RFM 3.8 §2.','APP.2.5 UZB, 3.8 §2'),
+ qm([],'RFM 3.1 §10.1 — smoke on the ground or in hover over a possible landing site: after landing immediately, pull:',['The EMERGENCY CUT-OFF gangbar','The GENERAL CUT-OUT handle','The fire extinguisher','The rotor brake'],'Then fuel flow levers shutdown, all electrical power levers OFF, booster pumps OFF, open all doors. NOTE: QRH Rev 1.0 says "Emergency CUT-OUT handle" — the RFM governs.','RFM 3.1 §10.1'),
+ qm([],'RFM 3.1 §10.2.2 — smoke of electrical origin, cockpit sliding windows:',['OPEN','CLOSE','Leave as they are','Jettison'],'Non-electric smoke: close the sliding windows. NOTE: QRH Rev 1.0 says CLOSE for electrical smoke — the RFM says OPEN.','RFM 3.1 §10.2'),
+ qm(['E1CH'],'ENG1 CH with the VMS working normally (RFM 3.6 §7):',['CONTINUE THE FLIGHT, watch engine parameters (N1, TOT, oil T and P)','Reduce power, fuel flow to fast reduction gate — LIMIT DURATION','Land immediately','Shut down the engine'],'"Reduce power + fast reduction gate + LIMIT DURATION" is RFM 3.3 §7.2 — after TOTAL VMS FAILURE. QRH Rev 1.0 shows only that version.','RFM 3.6 §7; 3.3 §7.2'),
+ qm([],'After TOTAL VMS failure, ENG CH illuminates:',['Reduce power, fuel flow control to fast reduction gate — LIMIT DURATION','Continue the flight','Land immediately','Chip pulse'],'Without VMS you cannot monitor engine parameters, hence the more restrictive action.','RFM 3.3 §7.2'),
+ qm([],'Loss of both APMs (failures after reconfiguration): IMC speed and urgency:',['Between Vy and 120 kt IAS — LIMIT DURATION OF FLIGHT, leave IMC ASAP','Above 50 kt — continue','Vy only — land ASAP','80–100 kt — continue'],'Not in QRH Rev 1.0.','RFM 3.9 §3'),
+ qm([],'Pitot head obstruction: RH (pilot) pitot → ADC switch to… ; LH (copilot) pitot → …',['ADC 1 ; ADC 2','ADC 2 ; ADC 1','BACKUP ; BACKUP','N ; N'],'Pilot side = RH system (ADC 2), so select the other ADC.','RFM 3.10 §4–5'),
+ qm([],'Use of cockpit/cabin fire extinguisher — after use:',['Avoid inhaling extinguisher agent as much as possible; ventilate cockpit/cabin','Close all vents','Pull the cut-out handle','Climb'],'RFM 3.1 §9.7 (not in QRH).','RFM 3.1 §9.7')]}
+];
+/* Limit cards from the RFM: [id, parameter, answer, number|null, unit, ref] */
+const FCARDS=[
+['m1','Maximum takeoff and landing weight (internal load)','9000 kg',9000,'kg','RFM 2.2'],
+['m2','Minimum weight in flight','4500 kg',4500,'kg','RFM 2.2'],
+['m3','Longitudinal CG datum — distance forward of the main rotor centerline','4.67 m',4.67,'m','RFM 2.2'],
+['h1','Max pressure altitude for takeoff and landing','16,700 ft',16700,'ft','RFM 2.3 §1'],
+['h2','Max pressure altitude in flight','25,000 ft',25000,'ft','RFM 2.3 §1'],
+['h3','Flight envelope limit with 8 cSt mineral oil in transmission','10,000 ft',10000,'ft','RFM 2.3 §1'],
+['t1','Maximum OAT (absolute)','+50 °C',50,'°C','RFM 2.3 §2'],
+['t2','Minimum OAT in normal operation','−30 °C',-30,'°C','RFM 2.3 §2'],
+['v1','Absolute VNE power-on, weight ≤ 8350 kg','167 kt',167,'kt','RFM 2.3 §4'],
+['v2','Absolute VNE power-on, weight > 8350 kg','150 kt',150,'kt','RFM 2.3 §4'],
+['v3','Absolute VNE power-off','145 kt',145,'kt','RFM 2.3 §4'],
+['v4','Max airspeed with one or both doors open','150 kt',150,'kt','RFM 2.3 §4'],
+['v5','Max airspeed while operating sliding doors','70 kt',70,'kt','RFM 2.3 §4'],
+['v6','Max airspeed while operating plug doors','55 kt',55,'kt','RFM 2.3 §4'],
+['v7','Max airspeed while operating the landing light','110 kt',110,'kt','RFM 2.3 §4'],
+['b1','Max bank angle, weight > 7800 kg','40°',40,'°','RFM 2.3 §5'],
+['b2','Max bank angle, weight > 8350 kg','30°',30,'°','RFM 2.3 §5'],
+['g1','Max taxiing ground speed','40 kt',40,'kt','RFM 2.3 §6'],
+['g2','Max braking ground speed','30 kt',30,'kt','RFM 2.3 §6'],
+['i1','IFR minimum IAS with basic AP','50 kt',50,'kt','RFM 2.3 §7'],
+['i2','IFR minimum IAS with IAS upper mode engaged','30 kt',30,'kt','RFM 2.3 §7'],
+['i3','Both APM failed — maximum IAS','120 kt',120,'kt','RFM 2.3 §7'],
+['i4','Both APM failed — minimum IAS','80 kt',80,'kt','RFM 2.3 §7'],
+['i5','G/S mode limit','6.5°',6.5,'°','RFM 2.3 §7'],
+['i6','ILS minimum decision height','185 ft',185,'ft','RFM 2.3 §7'],
+['c1','Maximum persons transported (incl. crew)','27',27,'','RFM 2.1 §6'],
+['r1','Max wind for first engine start with rotor brake released','30 kt',30,'kt','RFM 2.4 §1.1'],
+['r2','N1 to release rotor brake, POST SB 63-22','70 %',70,'%','RFM 2.4 §1.1'],
+['r3','N1 to release rotor brake, PRE SB 63-22','45 %',45,'%','RFM 2.4 §1.1'],
+['r4','Max time running an engine with rotor brake applied','5 min',5,'min','RFM 2.4 §1.1'],
+['r5','Max NR for rotor brake application','45 %',45,'%','RFM 2.4 §1.2'],
+['r6','Min interval 1st–2nd rotor brake application','5 min',5,'min','RFM 2.4 §1.2'],
+['r7','Min interval 2nd–3rd rotor brake application','15 min',15,'min','RFM 2.4 §1.2'],
+['r8','Rotor start wind envelope A+B+C (POST SB 63-22)','65 kt',65,'kt','RFM 2.4'],
+['s0','Start on battery at ambient temperature — minimum OAT','−15 °C',-15,'°C','RFM 2.5 §1.1'],
+['s0b','Relight guaranteed only with hot engine above','13,000 ft',13000,'ft','RFM 2.5 §1.1'],
+['s0c','Wait after 3 consecutive start/crank attempts','20 min',20,'min','RFM 2.5 §1.1'],
+['p1','Collective limit, level flight, < 8350 kg','16.5°',16.5,'°','RFM 2.5 §2.1'],
+['p2','Collective limit, level flight, > 8350 kg','16°',16,'°','RFM 2.5 §2.1'],
+['p3','Collective limit in climb (spring stop)','17.5°',17.5,'°','RFM 2.5 §2.1'],
+['p4','Collective travel limit stop','19°',19,'°','RFM 2.5 §2.1'],
+['q1','Power at 100 % torque','2235 kW',2235,'kW','RFM 2.5 §2.2'],
+['q2','Torque AEO MCP','81 %',81,'%','RFM 2.5 §2.2'],
+['q3','Torque OEI maximum contingency (2 min 30 s)','69 %',69,'%','RFM 2.5 §2.2'],
+['q4','Torque OEI intermediate contingency','66 %',66,'%','RFM 2.5 §2.2'],
+['q5','Torque OEI transient overtorque (20 s)','74 %',74,'%','RFM 2.5 §2.2'],
+['n1','N1 TOP, OAT < 15 °C','100.45 %',100.45,'%','RFM 2.5 §2.3.1'],
+['n2','N1 MCP','97.3 %',97.3,'%','RFM 2.5 §2.3.1'],
+['n3','N1 max transient power (20 s)','105 %',105,'%','RFM 2.5 §2.3.1'],
+['n4','N1 OEI maximum contingency (absolute max)','102.4 %',102.4,'%','RFM 2.5 §2.3.1'],
+['n5','N1 OEI intermediate contingency','100 %',100,'%','RFM 2.5 §2.3.1'],
+['n6','Max N1 misalignment between engines (approx.)','1.5 %',1.5,'%','RFM 2.5 §2.3.1'],
+['n7','Training card (PMU) failure: engine 2 limited to N1','99.4 %',99.4,'%','RFM 3.6 §10'],
+['o1','TOT TOP (5 min)','795 °C',795,'°C','RFM 2.5 §2.4'],
+['o2','TOT MCP','735 °C',735,'°C','RFM 2.5 §2.4'],
+['o3','TOT OEI maximum contingency','830 °C',830,'°C','RFM 2.5 §2.4'],
+['o4','TOT OEI intermediate contingency','785 °C',785,'°C','RFM 2.5 §2.4'],
+['o5','TOT at start, unlimited time','750 °C',750,'°C','RFM 2.5 §2.4'],
+['o6','Residual TOT requiring hot start check','100 °C',100,'°C','RFM 4.3 §2.4'],
+['w1','Nominal rotor speed (rpm)','265 rpm',265,'rpm','RFM 2.5 §2.5'],
+['w2','NR regulation range — upper limit','103.8 %',103.8,'%','RFM 2.5 §2.5'],
+['w3','NR regulation range — lower limit / NR min aural','92.5 %',92.5,'%','RFM 2.5 §2.5'],
+['w4','Minimum transient NR in flight (power-on)','83 %',83,'%','RFM 2.5 §2.5'],
+['w5','Max continuous NR power-off / NR max aural','109.5 %',109.5,'%','RFM 2.5 §2.5'],
+['w6','Max transient NR power-off (20 s)','117 %',117,'%','RFM 2.5 §2.5'],
+['w7','Engine overspeed shutdown (equivalent NR)','120 %',120,'%','RFM 2.5 §2.6'],
+['w8','Free turbine rpm at 100 % NR','22,850 rpm',22850,'rpm','RFM 2.5 §2.6'],
+['f1','Fuel pressure minimum','0.30 bar',0.3,'bar','RFM 2.5 §3.1'],
+['f2','Fuel pressure maximum','1.33 bar',1.33,'bar','RFM 2.5 §3.1'],
+['e1','Engine oil pressure minimum','1.7 bar',1.7,'bar','RFM 2.5 §3.2'],
+['e2','Engine oil pressure maximum','6 bar',6,'bar','RFM 2.5 §3.2'],
+['e3','Engine oil max temperature','120 °C',120,'°C','RFM 2.5 §3.2'],
+['g3','MGB main system pressure range','3.5 – 8 bar',null,'','RFM 2.5 §3.3.1'],
+['g4','MGB emergency system pressure range','2 – 4.5 bar',null,'','RFM 2.5 §3.3.1'],
+['g5','MGB max oil temperature','145 °C',145,'°C','RFM 2.5 §3.3.1'],
+['g6','MGB P light threshold (Post MOD 07-52453)','0.4 bar',0.4,'bar','RFM 2.5 §3.3.1'],
+['g7','IGB / TGB max temperature','120 °C',120,'°C','RFM 2.5 §3.3.2'],
+['y1','Main hydraulic nominal pressure','150 – 195 bar',null,'','RFM 2.5 §3.4'],
+['y2','Main hydraulic max pressure','210 bar',210,'bar','RFM 2.5 §3.4'],
+['y3','Auxiliary hydraulic max pressure','190 bar',190,'bar','RFM 2.5 §3.4'],
+['y4','Hydraulic minimum pressure (main and aux)','80 bar',80,'bar','RFM 2.5 §3.4'],
+['y5','Ancillary accumulator minimum before landing (LH failure)','120 bar',120,'bar','RFM 3.2'],
+['el1','AC voltage max / min','132 V / 98 V',null,'','RFM 2.5 §3.5'],
+['el2','DC voltage max / min','32 V / 14 V',null,'','RFM 2.5 §3.5'],
+['el3','Battery voltage before start','> 25 V',25,'V','RFM 4.3 §1.1'],
+['el4','Battery voltage below which total electrical failure may be imminent','22 V',22,'V','RFM 3.8'],
+['a1','Anti-icing additive max concentration','0.15 %',0.15,'%','RFM 2.6 §2'],
+['a2','Air intake anti-icing max OAT continuous','+10 °C',10,'°C','RFM 2.7 §2'],
+['sl1','Slope, rotor stopped, nose down max','8°',8,'°','RFM 2.7 §3'],
+['sl2','Slope, rotor spinning, any direction','12°',12,'°','RFM 2.7 §3'],
+['l1','Normal takeoff hover height','8 ft',8,'ft','RFM 4.4 §2.3.1'],
+['l2','Short/vertical takeoff hover height','15 ft',15,'ft','RFM 4.4 §2.3.2'],
+['l3','Normal cruise collective pitch','15.5°',15.5,'°','RFM 4.5'],
+['l4','Normal landing: IAS at 80 ft','40 kt',40,'kt','RFM 4.6 §3.1'],
+['l5','Normal landing: rate of descent at 80 ft','300 ft/min',300,'ft/min','RFM 4.6 §3.1'],
+['l6','Max nose-up attitude near the ground','10°',10,'°','RFM 4.6'],
+['l7','Gear extension recommended max IAS','110 kt',110,'kt','RFM 4.6 §1'],
+['fu1','Total fuel, basic, without 6th tank','2043 L',2043,'L','RFM 4.10 §1.1'],
+['fu2','Feeder tank fuel at low level light (LONGI)','90 L',90,'L','RFM 3.5 §2.4'],
+['fu3','Feeder tank minimum to keep','60 L',60,'L','RFM 3.5 §2.4'],
+['ap1','Hands-on-controls height (AFCS)','200 ft',200,'ft','RFM 4.10 §2.1'],
+['tu1','Severe turbulence max speed (TAS)','135 kt',135,'kt','RFM 4.8 §4']
+].map(a=>({id:a[0],p:a[1],a:a[2],n:a[3],u:a[4],r:a[5],en:1}));
+let P={xp:0,streak:0,last:'',done:{},ans:0,ok:0,miss:[],srs:{},timer:false};
+try{const s=localStorage.getItem('rle532');if(s)P=Object.assign(P,JSON.parse(s))}catch(e){}
+const save=()=>{try{localStorage.setItem('rle532',JSON.stringify(P))}catch(e){}};
+const $=id=>document.getElementById(id);
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const dayN=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+const INT=[0,1,3,7,21];
+/* registry */
+const ALL={};
+FUNITS.forEach((u,ui)=>u.q.forEach((q,k)=>{const id='f:'+ui+'.'+k;ALL[id]={k:'q',id,q}}));
+FCARDS.forEach(c=>{const id='k:'+c.id;ALL[id]={k:'c',id,c}});
+QUNITS.forEach((u,ui)=>u.q.forEach((q,k)=>{const id='x:'+ui+'.'+k;ALL[id]={k:'q',id,q}}));
+QDRILLS.forEach(d=>{d.en=1;const id='qd:'+d.id;ALL[id]={k:'d',id,d}});
+LIGHTS.forEach(l=>{['m','w'].forEach(m=>{const id='a:'+l.id+':'+m;ALL[id]={k:'a',id,l,m}})});
+/* lamps & urgency */
+function lamp(x){
+  if(x[0]=='#')return `<span class="gauge">${esc(x.slice(1))}</span>`;
+  const l=LMAP[x];if(!l)return '';
+  if(l.s=='y')return `<span class="ann y"><i></i><b>${esc(l.t)}</b></span>`;
+  if(l.s=='rv')return `<span class="ann rv">${esc(l.t).split('').map(c=>c==' '?'':`<b>${c}</b>`).join('')}</span>`;
+  if(l.s=='ha'||l.s=='hg')return `<span class="ann ${l.s}"><i></i><b>${esc(l.t)}</b></span>`;
+  return `<span class="ann ${l.s}">${esc(l.t)}</span>`}
+const lamps=a=>a&&a.length?`<div class="lamps">${a.map(lamp).join('<em>+</em>')}</div>`:'';
+const UCL={'LAND IMMEDIATELY':'u-li','LAND AS SOON AS POSSIBLE':'u-la','LIMIT DURATION OF FLIGHT':'u-ld','CONTINUE THE FLIGHT':'u-cf'};
+const urg=h=>h.replace(/LAND IMMEDIATELY|LAND AS SOON AS POSSIBLE|LIMIT DURATION OF FLIGHT|CONTINUE THE FLIGHT/g,m=>`<span class="${UCL[m]}">${m}</span>`);
+const tx=s=>urg(esc(s));
+const EN=()=>true;
+const SRC=r=>(r||'').startsWith('QRH')?'QRH':'RFM';
+function upd(id,ok){const s=P.srs[id]||{b:0};s.b=ok?Math.min(s.b+1,4):0;s.d=dayN()+INT[s.b];P.srs[id]=s}
+const dueIds=()=>Object.keys(P.srs).filter(i=>ALL[i]&&P.srs[i].d<=dayN()).sort((a,b)=>P.srs[a].d-P.srs[b].d);
+const box=id=>(P.srs[id]?P.srs[id].b:0);
+const stars=id=>P.srs[id]?'★'.repeat(P.srs[id].b)+'☆'.repeat(4-P.srs[id].b):'☆☆☆☆';
+let tmr=null;const clr=()=>{if(tmr){clearInterval(tmr);tmr=null}};
+
+const chap=(pre,units,fn)=>units.map((u,ui)=>{const ids=u.q.map((_,k)=>pre+ui+'.'+k),m=ids.filter(i=>box(i)>=3).length;
+  return `<button class="dr" onclick="${fn}(${ui})"><div><span class="dot" style="background:${u.c}"></span>${esc(u.n)}<small>${esc(u.d)} · ${u.q.length} q.</small></div><span>${m}/${u.q.length}</span></button>`}).join('');
+function home(){
+  clr();
+  const acc=P.ans?Math.round(P.ok/P.ans*100):0;
+  const nd=dueIds().length,known=FCARDS.filter(c=>box('k:'+c.id)>=3).length;
+  const lk=LIGHTS.filter(l=>box('a:'+l.id+':m')>=3&&box('a:'+l.id+':w')>=3).length;
+  let h=`<div class="top"><b>AS 532 AL Trainer</b><div class="stat"><span>🔥 ${P.streak}</span><span>⭐ ${P.xp}</span><span>🎯 ${acc}%</span></div></div>
+  <div class="modes" style="margin-top:14px">
+   <button class="mode wide ${nd?'hot':''}" onclick="startReview()"><b>🔁 Review: ${nd}</b><span>${nd?'Items due by schedule (1, 3, 7, 21 days)':'Nothing due today. Take a new chapter.'}</span></button>
+  </div>
+  <div class="qrh"><div class="qh2"><b>QRH · Emergency procedures</b><span>Checked against RFM Section 3</span></div>
+   <button class="mode wide" onclick="startLamps()"><b>🚨 Annunciators</b><span>Warning, caution and indicator lights · mastered ${lk} of ${LIGHTS.length}</span></button>
+   <div class="sec"><span>Failures by chapter</span></div>${chap('x:',QUNITS,'startQ')}
+   <div class="sec"><span>Drills (${QDRILLS.filter(x=>box('qd:'+x.id)>=3).length}/${QDRILLS.length})</span><label class="tg"><input type="checkbox" ${P.timer?'checked':''} onchange="P.timer=this.checked;save()">Timer 15 s</label></div>`;
+  QDRILLS.forEach(x=>{h+=`<button class="dr" onclick="startQD('${x.id}')"><div>${esc(x.t)}</div><span>${stars('qd:'+x.id)}</span></button>`});
+  h+=`</div>
+  <div class="qrh fm"><div class="qh2"><b>Flight Manual · Limitations & normal procedures</b><span>AS 532 AL (ALe) RFM · UZB appendix</span></div>
+   <div class="modes">
+    <button class="mode" onclick="startCards()"><b>🔢 Limits</b><span>Numbers to know · ${known} of ${FCARDS.length}</span></button>
+    <button class="mode" onclick="startMix()"><b>🎲 Random 10</b><span>From all RFM chapters</span></button>
+   </div>
+   <div class="sec"><span>Chapters</span></div>${chap('f:',FUNITS,'startF')}
+  </div>
+  <div class="foot">Progress is stored only in this browser. Where the QRH (Rev 1.0) and the approved RFM differ, the RFM answer is used and the difference is noted.</div>`;
+  $('home').innerHTML=h;
+}
+let L=null;
+function prep(item){const o={k:item.k,id:item.id};
+  if(item.k=='a'){o.k='q';o.q=lampQ(item)}
+  if(item.k=='q'||item.k=='a'){if(item.k=='q')o.q=item.q;if(o.q.t=='mc')o.opts=shuf(o.q.o.map((x,i)=>({x,c:i==0,i})));if(o.q.t=='ord'){o.opts=shuf(o.q.o.map((x,i)=>({x,i})));o.pick=[]}}
+  if(item.k=='c'){o.c=item.c;o.shown=false}
+  if(item.k=='d'){o.d=item.d;o.step=0;o.err=0;o.opts=null}
+  return o}
+function lampQ(it){
+  const l=it.l,same=LIGHTS.filter(x=>x!==l&&x.m!==l.m&&x.t!==l.t),grp=shuf(same.filter(x=>x.g==l.g)),oth=shuf(same.filter(x=>x.g!=l.g));
+  const pool=[...grp,...oth],pick=[],seen=new Set([l.m]);
+  for(const x of pool){if(pick.length>=3)break;if(!seen.has(x.m)){seen.add(x.m);pick.push(x)}}
+  const tab=l.tab!='—'?' · Tab '+l.tab:'';
+  if(it.m=='m')return{t:'mc',en:1,l:[l.id],big:1,q:'What does this light indicate?',o:[l.m,...pick.map(x=>x.m)],e:'',r:'QRH annunciators'+tab};
+  return{t:'mc',en:1,q:l.m,qtl:'Which light indicates this?',o:[l.t,...pick.map(x=>x.t)],ol:[l.id,...pick.map(x=>x.id)],e:'',r:'QRH annunciators'+tab}}
+function begin(ids,meta){
+  if(!ids.length){alert('Nothing to practise yet');return}
+  L={q:shuf(ids).map(i=>prep(ALL[i])),n:ids.length,done:0,err:0,xp:0,meta,cur:null,sel:null,checked:false,seen:{}};
+  $('quiz').classList.add('on');next()}
+function startReview(){const d=dueIds().slice(0,12);if(!d.length)return alert('Nothing due today');begin(d,{rev:1})}
+function startMix(){begin(shuf(Object.keys(ALL).filter(i=>i.startsWith('f:'))).slice(0,10),{mix:1})}
+function startF(ui){begin(FUNITS[ui].q.map((_,k)=>'f:'+ui+'.'+k).sort((a,b)=>box(a)-box(b)).slice(0,12),{qch:1})}
+function startCards(){
+  const all=FCARDS.map(c=>'k:'+c.id),due=dueIds().filter(i=>i[0]=='k'),fresh=all.filter(i=>!P.srs[i]);
+  const rest=shuf(all.filter(i=>!due.includes(i)&&!fresh.includes(i)));
+  begin([...shuf(due),...shuf(fresh),...rest].slice(0,10),{cards:1})}
+function startQD(id){begin(['qd:'+id],{drill:1})}
+function startQ(ui){begin(QUNITS[ui].q.map((_,k)=>'x:'+ui+'.'+k).sort((a,b)=>box(a)-box(b)).slice(0,12),{qch:1})}
+function startLamps(){
+  const all=LIGHTS.flatMap(l=>['a:'+l.id+':m','a:'+l.id+':w']),due=dueIds().filter(i=>i[0]=='a'),fresh=shuf(all.filter(i=>!P.srs[i]));
+  const rest=shuf(all.filter(i=>!due.includes(i)&&!fresh.includes(i)));
+  begin([...shuf(due),...fresh,...rest].slice(0,12),{lamps:1})}
+function next(){clr();if(!L.q.length)return finish();L.cur=L.q[0];L.sel=null;L.checked=false;render()}
+const bar=()=>`<div class="qh"><button class="x" onclick="quit()">✕</button><div class="bar"><i style="width:${L.done/L.n*100}%"></i></div></div>`;
+function render(){
+  clr();const c=L.cur;
+  if(c.k=='q')return renderQ();
+  if(c.k=='c')return renderC();
+  return renderD()}
+function renderQ(){
+  const c=L.cur,q=c.q;
+  const lab=q.qtl||(SRC(q.r)+' · '+(q.big?'Annunciator':q.t=='tf'?'True or false?':'Choose the answer'));
+  let h=`<div class="qin">${bar()}<div class="qt">${lab}</div>${q.big?`<div class="lamps big">${lamp(q.l[0])}</div>`:lamps(q.l)}${q.big?'':`<h2 class="qq">${tx(q.q)}</h2>`}`;
+  if(q.t=='mc')c.opts.forEach((o,i)=>h+=`<button class="opt ${q.ol?'lop':''} ${L.sel===i?'sel':''}" onclick="pick(${i})">${q.ol?lamp(q.ol[o.i]):tx(o.x)}</button>`);
+  if(q.t=='tf')[['True',true],['False',false]].forEach(([t,v])=>h+=`<button class="opt ${L.sel===v?'sel':''}" onclick="pickTF(${v})">${t}</button>`);
+  if(q.t=='ord'){
+    h+=`<div class="slots">`+(c.pick.length?c.pick.map((i,n)=>`<button class="opt" onclick="unpick(${n})">${n+1}. ${esc(q.o[i])}</button>`).join(''):`<div class="hint">Tap the steps in order</div>`)+`</div>`;
+    c.opts.forEach(o=>{if(!c.pick.includes(o.i))h+=`<button class="opt" onclick="addp(${o.i})">${esc(o.x)}</button>`})}
+  h+=`</div><div class="fb" id="fb"><div class="fbi"><button class="btn full" id="chk" onclick="check()" ${canCheck()?'':'disabled'}>Check</button></div></div>`;
+  $('quiz').innerHTML=h}
+const canCheck=()=>{const c=L.cur;return c.q.t=='ord'?c.pick.length==c.q.o.length:L.sel!==null};
+function pick(i){if(L.checked)return;L.sel=i;renderQ()}
+function pickTF(v){if(L.checked)return;L.sel=v;renderQ()}
+function addp(i){if(L.checked)return;L.cur.pick.push(i);renderQ()}
+function unpick(n){if(L.checked)return;L.cur.pick.splice(n,1);renderQ()}
+function check(){
+  if(L.checked||!L.cur)return;const c=L.cur;
+  if(c.k=='c')return checkC();
+  if(!canCheck())return;L.checked=true;
+  const q=c.q;let ok;
+  if(q.t=='mc')ok=c.opts[L.sel].c;else if(q.t=='tf')ok=L.sel===q.a;else ok=c.pick.every((v,n)=>v==n);
+  const btns=[...document.querySelectorAll('.qin .opt')];
+  if(q.t=='mc')btns.forEach((b,i)=>{b.disabled=true;if(c.opts[i].c)b.classList.add('good');else if(i==L.sel)b.classList.add('bad')});
+  else if(q.t=='tf')btns.forEach((b,i)=>{b.disabled=true;const v=i==0;if(v===q.a)b.classList.add('good');else if(v===L.sel)b.classList.add('bad')});
+  else btns.forEach(b=>b.disabled=true);
+  let ans='';
+  if(q.t=='tf')ans=`Correct answer: ${q.a?'true':'false'}.`;
+  if(q.t=='mc'){const l0=q.ol?LMAP[q.ol[0]]:(q.big?LMAP[q.l[0]]:null);
+    if(l0)ans=`${lamp(l0.id)} ${esc(l0.m)}`;else ans=ok?'':`Correct: ${tx(q.o[0])}`}
+  if(q.t=='ord')ans=ok?'':'Correct order: '+q.o.map((s,i)=>`${i+1}) ${esc(s)}`).join('; ');
+  done(ok,ans,q.e,q.r)}
+/* common item completion */
+function done(ok,ans,e,r){
+  const c=L.cur;L.checked=true;
+  P.ans++;if(ok)P.ok++;
+  if(!L.seen[c.id]){L.seen[c.id]=1;upd(c.id,ok)}
+  L.q.shift();
+  if(ok){L.xp+=10;L.done++}else{L.err++;L.q.push(prep(ALL[c.id]))}
+  save();fb(ok,ans,e,r,'next()')}
+function fb(ok,ans,e,r,go,label){
+  const f=$('fb');f.className='fb '+(ok?'ok':'bad');
+  const en=EN();
+  f.innerHTML=`<div class="fbi"><div class="fbt">${ok?'Correct!':'Incorrect'}</div><div class="fbe">${ans?`<div>${ans}</div>`:''}${e?`<div>${tx(e)}</div>`:''}</div><div class="fbr">Source: ${esc(r)}</div><button class="btn full" style="background:${ok?'var(--ok)':'var(--bad)'}" onclick="${go}">${label||'Next'}</button></div>`}
+/* limit cards */
+function renderC(){
+  const c=L.cur,k=c.c;
+  let h=`<div class="qin">${bar()}<div class="qt">RFM · Limits</div><h2 class="qq">${esc(k.p)}</h2>`;
+  if(k.n!==null)h+=`<input class="num" id="num" inputmode="decimal" autocomplete="off" placeholder="Number${k.u?', '+esc(k.u):''}" onkeydown="if(event.key=='Enter')check()">`;
+  else if(c.shown)h+=`<div class="ansbox">${esc(k.a)}</div>`;
+  h+=`</div><div class="fb" id="fb"><div class="fbi">`;
+  if(k.n!==null)h+=`<button class="btn full" onclick="check()">Check</button>`;
+  else if(!c.shown)h+=`<button class="btn full" onclick="L.cur.shown=true;renderC()">Show answer</button>`;
+  else h+=`<div class="row2"><button class="btn ghost" onclick="grade(false)">Didn’t know</button><button class="btn" style="background:var(--ok)" onclick="grade(true)">Knew it</button></div>`;
+  h+=`</div></div>`;
+  $('quiz').innerHTML=h;
+  if(k.n!==null){const i=$('num');i&&i.focus()}}
+function checkC(){
+  const c=L.cur,k=c.c,i=$('num');if(!i||!i.value.trim())return;
+  const v=parseFloat(i.value.replace(',','.').replace(/\s/g,'').replace('−','-'));
+  const ok=!isNaN(v)&&Math.abs(v-k.n)<1e-6;
+  i.disabled=true;
+  done(ok,`Answer: <b>${esc(k.a)}</b>`,'',k.r)}
+function grade(ok){if(L.checked)return;done(ok,`Answer: <b>${esc(L.cur.c.a)}</b>`,'',L.cur.c.r)}
+/* step drills */
+function stepOpts(c){
+  const s=c.d.s,cur=s[c.step],pool=[];
+  const same=shuf(s.slice(c.step+1)).slice(0,2);
+  const other=shuf(QDRILLS.filter(x=>x!==c.d).flatMap(x=>x.s)).filter(x=>!s.includes(x));
+  const o=[cur,...same];for(const x of other){if(o.length>=4)break;o.push(x)}
+  return shuf(o.slice(0,4))}
+function renderD(){
+  clr();const c=L.cur,d=c.d;
+  if(!c.opts)c.opts=stepOpts(c);
+  const en=d.en;
+  let h=`<div class="qin">${bar()}<div class="qt">Drill · step ${c.step+1} of ${d.s.length}</div>${lamps(d.l)}<h2 class="qq">${tx(d.sit)}</h2>`;
+  c.d.s.slice(0,c.step).forEach((x,i)=>h+=`<div class="dn">${i+1}. ${tx(x)}</div>`);
+  h+=`<div class="qt" style="margin-top:14px">${c.step?'Next item?':'First item?'}</div>`;
+  if(P.timer)h+=`<div class="tm"><i id="tmi"></i></div>`;
+  c.opts.forEach((x,i)=>h+=`<button class="opt" onclick="pickStep(${i})">${tx(x)}</button>`);
+  h+=`</div><div class="fb" id="fb" style="display:none"></div>`;
+  $('quiz').innerHTML=h;
+  if(P.timer){const t0=Date.now();tmr=setInterval(()=>{const f=1-(Date.now()-t0)/15000,i=$('tmi');if(i)i.style.width=Math.max(f,0)*100+'%';if(f<=0){clr();pickStep(-1)}},100)}}
+function pickStep(i){
+  if(L.checked)return;clr();L.checked=true;
+  const c=L.cur,d=c.d,right=d.s[c.step],btns=[...document.querySelectorAll('.qin .opt')];
+  const ok=i>=0&&c.opts[i]==right;
+  const tm=document.querySelector('.tm');if(tm)tm.style.display='none';
+  btns.forEach((b,j)=>{b.disabled=true;if(c.opts[j]==right)b.classList.add('good');else if(j==i)b.classList.add('bad')});
+  if(ok){setTimeout(()=>{if(L&&L.cur===c)advance()},550)}
+  else{c.err++;const f=$('fb');f.style.display='';fb(false,(i<0?'Time is up. ':'')+`Next item: <b>${tx(right)}</b>`,'',d.r,'advance()')}}
+function advance(){
+  const c=L.cur;c.step++;c.opts=null;L.checked=false;
+  if(c.step>=c.d.s.length)return endDrill();
+  renderD()}
+function endDrill(){
+  const c=L.cur,ok=c.err==0;L.checked=true;
+  P.ans++;if(ok)P.ok++;
+  if(!L.seen[c.id]){L.seen[c.id]=1;upd(c.id,ok)}
+  L.q.shift();
+  if(ok){L.xp+=15;L.done++}else{L.err++;L.q.push(prep(ALL[c.id]))}
+  save();
+  const f=$('fb');f.style.display='';
+  fb(ok,ok?'All items correct.':`Errors: ${c.err}. It will come again at the end.`,'',c.d.r,'next()')}
+function finish(){
+  clr();const m=L.meta;
+  P.xp+=L.xp;const t=today();
+  if(P.last!=t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);P.streak=P.last==y?P.streak+1:1;P.last=t}
+  save();
+  const acc=Math.round((L.n/(L.n+L.err))*100);
+  const title=m.drill?'Drill complete':m.lamps?'Annunciators done':m.rev?'Review done':m.cards?'Limits done':m.mix?'Done':'Chapter done';
+  $('quiz').innerHTML=`<div class="qin end"><div class="big">🏁</div><h2>${title}</h2>
+  <div class="cards"><div><b>+${L.xp}</b><span>XP</span></div><div><b>${acc}%</b><span>accuracy</span></div><div><b>🔥${P.streak}</b><span>day streak</span></div></div>
+  <button class="btn full" onclick="quit()">Continue</button></div>`}
+function quit(){clr();$('quiz').classList.remove('on');L=null;home()}
+home();
+</script></body></html>
